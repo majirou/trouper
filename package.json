@@ -1,0 +1,17 @@
+{
+  "name": "majirou-trouper",
+  "version": "0.1.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "majirou",
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^4.16.4",
+    "mkdirp": "^0.5.1",
+    "puppeteer": "^1.11.0",
+    "mongodb": "^3.1.10"
+  }
+}
