@@ -1,3 +1,9 @@
 node_modules/*
-#public_html/data/tmp
+public_html/cli*
+public_html/data/tmp/*
+public_html/data/scenario/*
 .DS_Store
+vue-cli/node_modules/*
+vue-cli/\.*
+test*
+\.*

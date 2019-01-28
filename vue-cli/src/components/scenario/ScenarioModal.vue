@@ -1,0 +1,177 @@
+<template lang="pug">
+  transition(name="modal")
+    div.modal-mask(v-if="showModal")
+      div.modal-wrapper
+        div.modal-container
+          div.modal-header.d-flex
+            div シナリオ{{type}}
+            div.small.text-secondary(v-if="scenario") ID:{{scenario._id}}
+          div.modal-body
+            div.form-group
+              label Base URL:
+              input.form-control(disabled :value="url")
+            div.row
+              div.col-8.form-group
+                label シナリオ名:
+                input.form-control(type="text" v-model="scenarioName")
+              div.col-4.form-group
+                label 次回クロール予定日:
+                input.form-control(type="date" v-model="nextCrawlingDate")
+            div.row
+              div.col-8.form-group
+                label Mail:
+                input.form-control(type="email" v-model="notificationMail")
+              div.col-4.form-group
+                label Notification:
+                div
+                  div.form-check.form-check-inline(v-for="(v,i) in notifications" :key="i")
+                    input.form-check-input(
+                      type="checkbox"
+                      :id="'notification'+i"
+                      :value="v.value"
+                      v-model="notification"
+                    )
+                    label.form-check-label(:for="'notification'+i") {{v.text}}
+            div.alert.alert-danger.my-1(v-show="errors.length>0")
+              ul.mb-0.pl-3
+                li(v-for="(v,i) in errors" :key="i") {{v}}
+          div.modal-footer
+            button.btn.btn-secondary.mr-3(@click="close") CLOSE
+            button.btn.btn-primary(@click="save") SAVE
+</template>
+
+<script>
+export default {
+  name: 'Scenario',
+  data () {
+    return {
+      notification: null,
+      notifications: [
+        { text: 'All', value: 1 },
+        { text: 'Part', value: 2 },
+        { text: 'Capture', value: 4 }
+      ],
+      scenarioName: null,
+      notificationMail: null,
+      nextCrawlingDate: null,
+      interval: 1, // 1: weekly , 2: monthly
+      errors: []
+    }
+  },
+  props: ['showModal', 'url', 'siteTitle', 'registeringErrors', 'dir', 'scenario', 'type'],
+  methods: {
+    close: function () {
+      this.$emit('close')
+    },
+    init: function () {
+      var now = new Date()
+      var y = now.getFullYear()
+      var m = ('00' + (now.getMonth() + 1)).slice(-2)
+      var d = ('00' + now.getDate()).slice(-2)
+      this.nextCrawlingDate = y + '-' + m + '-' + d
+      this.notification = [1, 2, 4]
+      this.scenarioName = null
+      this.notificationMail = null
+    },
+    save: function () {
+      this.error = []
+      // validation
+      if (!this.scenarioName) {
+        this.errors.push('シナリオ名を入力してください')
+      }
+      if (!this.nextCrawlingDate) {
+        this.errors.push('次回クロール予定日を入力してください')
+      }
+      if (this.error.length === 0) {
+        // no error
+        const ret = {
+          url: this.url,
+          name: this.scenarioName,
+          date: this.nextCrawlingDate,
+          notify: this.notification,
+          mail: this.notificationMail,
+          interval: this.interval,
+          dir: this.dir
+        }
+        this.close()
+        this.$emit('save', ret)
+      }
+    }
+  },
+  mounted: function () {
+    this.init()
+  },
+  watch: {
+    siteTitle: function () {
+      this.scenarioName = '' + this.siteTitle.trim()
+    },
+    registeringErrors: function () {
+      console.error(this.errors, this.registeringErrors)
+    },
+    scenario: function () {
+      this.scenarioName = this.scenario.name
+      this.notificationMail = this.scenario.mail
+      this.notification = this.scenario.notify
+      this.nextCrawlingDate = this.scenario.date
+    }
+  }
+}
+</script>
+
+<style scoped>
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+  display: table;
+  transition: opacity .3s ease;
+}
+
+.modal-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.modal-container {
+  width: 70vw;
+  min-width: 600px;
+  margin: 0px auto;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+  transition: all .3s ease;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.modal-body {
+  margin: 0;
+}
+
+.modal-header {
+  padding-top: .75em;
+  padding-bottom: .75em;
+}
+
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-leave-active {
+  opacity: 0;
+}
+
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+}
+label {
+    margin-bottom: 0;
+    color: #666;
+    font-size:.75em;
+}
+</style>
