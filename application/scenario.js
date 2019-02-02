@@ -20,16 +20,51 @@ class Scenario {
 
         let find = { $and: [ {delete: {$ne: true} } ] }
         if( param.multiSearch ){
-            // const ms =
             const regexp = new RegExp(param.multiSearch) //, 'g')
             find.$or = [ {name: regexp}, {url: regexp} ]
         }
         const last_page =  Math.ceil( await collection.find().count() / param.limit )
-        const data = await collection.find( find )
-                                     .sort( param.sort )
-                                     .skip( param.skip )
-                                     .limit( param.limit )
-                                     .toArray()
+
+        const aggregatePrame = []
+
+        const match = {
+            "$match": {
+                "delete": {"$ne": true}
+            }
+        }
+        aggregatePrame.push(match)
+
+        if( param.multiSearch ){
+            const regexp = new RegExp(param.multiSearch) //, 'g')
+            const search = {
+                "$match": {
+                    "$or": [ {name: regexp}, {url: regexp} ]
+                }
+            }
+            aggregatePrame.push(search)
+        }
+
+        const project = { "$project": {
+        　　　　　"_id": 1,
+        　　　　　"name": 1,
+        　　　　　"url": 1,
+        　　　　　"dir": 1,
+        　　　　　"mail": 1,
+                "date": {　"$add": [ "$date", 32400000 ] }, // 9*60*60*1000
+            } }
+        aggregatePrame.push(project)
+
+        if ( param.sort != null ){
+            const sort = { "$sort": param.sort }
+            aggregatePrame.push(sort)
+        }
+        const skip = { "$skip": param.skip }
+        aggregatePrame.push(skip)
+        const limit = { "$limit": param.limit }
+        aggregatePrame.push(limit)
+
+        const data = await collection.aggregate(aggregatePrame).toArray()
+
         client.close()
         return { last_page: last_page , data: data }
     }

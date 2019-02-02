@@ -171,10 +171,10 @@ export default {
           align: 'center',
           cellClick: (e, cell) => this.$router.push(`/edit/${cell._cell.row.data._id}`)
         },
-        { title: 'シナリオ名', field: 'name', width: 300 },
-        { title: '次回予定日', field: 'date' },
+        { title: 'シナリオ名', field: 'name', width: 400 },
+        { title: '次回予定日', field: 'date', width: 100, formatter: cell => cell.getValue().substring(0, 10) },
         // { title: '最終実施日', field: 'execDate' },
-        { title: 'DIR', field: 'dir' },
+        { title: 'DIR', field: 'dir', width: 150 },
         { title: 'URL', field: 'url' },
         { formatter: () => '<i class="fas fa-trash"></i>',
           width: 40,
