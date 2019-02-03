@@ -11,16 +11,30 @@
               label Base URL:
               input.form-control(disabled :value="url")
             div.row
-              div.col-8.form-group
+              div.col-12.form-group
                 label シナリオ名:
                 input.form-control(type="text" v-model="scenarioName")
               div.col-4.form-group
-                label 次回クロール予定日:
+                label 次回予定日:
                 input.form-control(type="date" v-model="nextCrawlingDate")
-            div.row
-              div.col-8.form-group
-                label Mail:
-                input.form-control(type="email" v-model="notificationMail")
+              div.col-4.form-group
+                label 実行間隔:
+                div
+                  div.btn-group.btn-group-toggle.w-100
+                    label.btn.border.border-primary.w-100(
+                      :class="{'btn-primary':isActiveInterval(1),active:isActiveInterval(1)}"
+                    )
+                      input(type="radio" v-model="interval" value="1")
+                      | 週１
+                    label.btn.border.border-primary.w-100(
+                      :class="{'btn-primary':isActiveInterval(2),active:isActiveInterval(2)}"
+                    )
+                      input(type="radio" v-model="interval" value="2")
+                      | 月１
+                    //-
+                      label.btn.btn-primary
+                        input(type="radio" v-model="interval")
+                        | 年１
               div.col-4.form-group
                 label Notification:
                 div
@@ -32,6 +46,9 @@
                       v-model="notification"
                     )
                     label.form-check-label(:for="'notification'+i") {{v.text}}
+              div.col-8.form-group
+                label Mail:
+                input.form-control(type="email" v-model="notificationMail")
             div.alert.alert-danger.my-1(v-show="errors.length>0")
               ul.mb-0.pl-3
                 li(v-for="(v,i) in errors" :key="i") {{v}}
@@ -96,7 +113,8 @@ export default {
         this.close()
         this.$emit('save', ret)
       }
-    }
+    },
+    isActiveInterval (num) { return num === parseInt(this.interval) }
   },
   mounted: function () {
     this.init()
@@ -113,12 +131,13 @@ export default {
       this.notificationMail = this.scenario.mail
       this.notification = this.scenario.notify
       this.nextCrawlingDate = this.scenario.date
+      this.interval = this.scenario.interval
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -137,7 +156,7 @@ export default {
 }
 
 .modal-container {
-  width: 70vw;
+  width: 75vw;
   min-width: 600px;
   margin: 0px auto;
   background-color: #fff;
@@ -170,8 +189,11 @@ export default {
   transform: scale(1.1);
 }
 label {
-    margin-bottom: 0;
-    color: #666;
-    font-size:.75em;
+  margin-bottom: 0;
+  color: #666;
+  font-size:.75em;
+  &.btn{
+    font-size: 1rem;
+  }
 }
 </style>
