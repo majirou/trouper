@@ -22,12 +22,12 @@
                 div
                   div.btn-group.btn-group-toggle.w-100
                     label.btn.border.border-primary.w-100(
-                      :class="{'btn-primary':isActiveInterval(1),active:isActiveInterval(1)}"
+                      :class="{active:isActiveInterval(1)}"
                     )
                       input(type="radio" v-model="interval" value="1")
                       | 週１
                     label.btn.border.border-primary.w-100(
-                      :class="{'btn-primary':isActiveInterval(2),active:isActiveInterval(2)}"
+                      :class="{active:isActiveInterval(2)}"
                     )
                       input(type="radio" v-model="interval" value="2")
                       | 月１
@@ -37,15 +37,13 @@
                         | 年１
               div.col-4.form-group
                 label Notification:
-                div
-                  div.form-check.form-check-inline(v-for="(v,i) in notifications" :key="i")
-                    input.form-check-input(
-                      type="checkbox"
-                      :id="'notification'+i"
-                      :value="v.value"
-                      v-model="notification"
-                    )
-                    label.form-check-label(:for="'notification'+i") {{v.text}}
+                div.btn-group.btn-group-toggle.w-100
+                  label.btn.border.border-primary(
+                    v-for="(v,i) in notifications"
+                    :key="i"
+                    :class="{active:isActiveNotification(v.value)}"
+                  ) {{v.text}}
+                    input(type="checkbox" :value="v.value" v-model="notification")
               div.col-8.form-group
                 label Mail:
                 input.form-control(type="email" v-model="notificationMail")
@@ -114,7 +112,12 @@ export default {
         this.$emit('save', ret)
       }
     },
-    isActiveInterval (num) { return num === parseInt(this.interval) }
+    isActiveInterval (num) {
+      return num === parseInt(this.interval)
+    },
+    isActiveNotification (num) {
+      return (this.notification.find(n => n === num) != null)
+    }
   },
   mounted: function () {
     this.init()
@@ -130,7 +133,12 @@ export default {
       this.scenarioName = this.scenario.name
       this.notificationMail = this.scenario.mail
       this.notification = this.scenario.notify
-      this.nextCrawlingDate = this.scenario.date
+      const tmpDate = new Date(this.scenario.date)
+      const y = tmpDate.getFullYear()
+      const m = ('00' + (tmpDate.getMonth() + 1)).slice(-2)
+      const d = ('00' + tmpDate.getDate()).slice(-2)
+      this.nextCrawlingDate = y + '-' + m + '-' + d
+      // this.nextCrawlingDate = this.scenario.date
       this.interval = this.scenario.interval
     }
   }
@@ -194,6 +202,13 @@ label {
   font-size:.75em;
   &.btn{
     font-size: 1rem;
+  }
+}
+.btn{
+  &.active{
+    color: #fff;
+    background-color: #0062cc;
+    border-color: #005cbf;
   }
 }
 </style>
