@@ -2,7 +2,6 @@ class Differ {
     constructor () {
       // console.log("differ constructed")
       this.mongo = require('mongodb').MongoClient
-      this.url = 'mongodb://localhost:27017/scraper_db'
       this.param = {}
       this.errors = []
 
