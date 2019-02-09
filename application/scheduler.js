@@ -60,6 +60,8 @@ class Scheduler {
       this.param.executed = setDate(param.executed)
       // done
       this.param.done = setDate(param.done)
+      // notified
+      this.param.notified = setDate(param.notified)
       // scenarioId
       // console.log( param.scenarioId, typeof param.scenarioId, param.scenarioId.toString() )
       this.param.scenarioId = (param.scenarioId) ? ObjectId(param.scenarioId.toString().trim()) : null

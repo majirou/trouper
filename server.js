@@ -136,7 +136,7 @@ app.post( '/api/scenario' , async function( req, res ) {
             const updateResult = await scdl.updateSchedule(addResultScheduleId)
             if (!updateResult) throw new Error(`schedule updating error`)
             console.log( "updateResult",updateResult)
-            
+
             res.json( { id: resultScenarioId, error: null } )
         } else {
             console.log( s.errors )
@@ -166,7 +166,7 @@ app.put( '/api/scenario' , async function( req, res ) {
             res.json( { id: null, error: s.errors } )
         }
     } else {
-        res.status(400).send("Bad Request") 
+        res.status(400).send("Bad Request")
     }
 } )
 
@@ -185,9 +185,9 @@ app.delete( '/api/scenario/:id' , async function( req, res ) {
         }
 
     } else {
-        res.status(400).send("Bad Request") 
+        res.status(400).send("Bad Request")
     }
-} ) 
+} )
 
 // スケジュール取得
 
@@ -198,13 +198,13 @@ app.get( '/api/schedules/:scenarioId/recent', async function (req, res) {
         const scdl = new Scheduler()
         // console.log( "scenario id =",req.params.scenarioId)
         scdl.setSearchParameter( {scenarioId: req.params.scenarioId} )
-        const result = await scdl.getSchedules( { skip:0, limit: 2, sort: {done: -1} } ) 
-        res.json( result.data ) 
+        const result = await scdl.getSchedules( { skip:0, limit: 2, sort: {done: -1} } )
+        res.json( result.data )
     } catch( err ) {
         console.log( "error" , err);
         res.sendStatus(400).send("BadRequest")
     }
-} ) 
+} )
 
 // スケジュール取得
 app.get( '/api/schedule/:scenarioId/:id', function (req, res) {
@@ -216,7 +216,7 @@ app.get( '/api/schedule/:scenarioId/:id', function (req, res) {
         // 結果を返答
         res.send("end")
     }
-} ) 
+} )
 
 // 即時スケジュール追加
 app.post( '/api/schedule/now', async function (req, res) {
@@ -229,87 +229,10 @@ app.post( '/api/schedule/now', async function (req, res) {
 
         const Scraper = require('./application/scraper' ) ;
         const s = new Scraper();
-
-        const fs = require('fs')
-
         await s.immediatelyScrape(scenarioId)
-        .then( async res => {
-            console.log( "immediately scraped.".bgCyan,res.result)
-            const mkdirp = require('mkdirp')
-            const to = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}/`
-            const from = res.scrapedResult.temporarySavePath
-            
-            await mkdirp(to, async err => {
-                process.stdout.write( `mkdir ${to}`.bgCyan )
-                if(err) throw new Error(err)
-                console.log("...done")
-                // renameし、diff対応
-                await fs.rename( from, to, async err => {
-                    process.stdout.write( `rename from ${from}\n to ${to}`.bgCyan)
-                    if(err) throw new Error(err)
-                    console.log("\n...done")
-
-                    const Differ = require( `${process.cwd()}/application/differ` ) ;
-                    const dffr = new Differ();
-                    // const scenarioBasePath = `${process.cwd()}/public_html/data/scenario/${scenarioId}`
-    
-                    const oldDir = `${res.scenarioBasePath}/${res.scenario.dir}`
-                    const newDir = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}`
-
-                    console.log( `old: ${oldDir}`.bgCyan )
-                    console.log( `new: ${newDir}`.bgCyan )
-                    console.log( res )
-                    // page-diff
-                    console.log("page-diff".bgCyan)
-                    const oldFilePath = `${oldDir}/index.html`
-                    const newFilePath = `${newDir}/index.html`
-                    const outputPath  = `${newDir}/diff_${res.scenario.dir}.txt`
-                    await dffr.diffFull(oldFilePath, newFilePath, outputPath)
-
-                    // image-diff
-                    console.log("image-diff".bgCyan)
-                    const oldImageFilePath = `${oldDir}/screenshot.png`
-                    const newImageFilePath = `${newDir}/screenshot.png`
-                    const outputImagePath  = `${newDir}/diff_image_${res.scenario.dir}.png`
-                    await dffr.diffImage(oldImageFilePath, newImageFilePath, outputImagePath)
-
-                    // part-diff
-                    console.log("part-diff".bgCyan)
-                    await s.partialExtraction( to , res.scenario.actions )
-                    .then( async r => {
-                        console.log("partialExtraction",r)
-                        const oldFilePath = `${oldDir}/parts.html`
-                        const newFilePath = `${newDir}/parts.html`
-                        const outputPath  = `${newDir}/diff_parts_${res.scenario.dir}.txt`
-                        await dffr.diffFull (oldFilePath, newFilePath, outputPath)
-                    })
-                } )
-                console.log("fs.renamed...".bgCyan)
-            } ) 
-            console.log("fs.mkdirped...".bgCyan)
-            return res
-        } )
-        .then( async res => {
-            
-            // scenarioのdirを修正
-            const dt = new Date();
-            const scenarioData = {
-                dir: s.save_dir_name,
-                date: dt.getFullYear() + ("00" + (dt.getMonth()+1)).slice(-2) + ("00" + dt.getDate() ).slice(-2)
-            }
-
-            const Scenario = require( `${process.cwd()}/application/scenario` )
-            const scnr = new Scenario();
-            scnr.setRegisterParameter( scenarioData )
-            const updateScenarioResult = await scnr.updateScenario(scenarioId)
-            if (!updateScenarioResult) throw new Error(`scenario updating error`)
-            console.log( "updateScenarioResult".bgCyan, updateScenarioResult)
-
-        })
     } catch( err ) {
-        console.log( "error" , err);
+        console.error( "error".bgRed , err);
     } finally {
-        console.log("finally")
         // 結果を返答
         res.send("end")
     }
@@ -334,10 +257,10 @@ app.get( '/api/diff' , async function( req, res ) {
 
     await dffr.getDiffFile(id, before, after)
               .then( response => {
-                res.send(response) 
+                res.send(response)
               })
               .catch( err => {
-                console.error(__filename, err) 
+                console.error(__filename, err)
                 if( err.code === 'ENOENT'){
                     res.status(404).send("Not Found")
                 }else{
@@ -364,10 +287,10 @@ app.post( '/api/diff' , async function( req, res ) {
     await dffr.diffFull(diffedFilePath, differFilePath, outputPath)
               .then( response => {
                 console.log("response",response)
-                res.status(200).send(response) 
+                res.status(200).send(response)
               })
               .catch( err => {
-                console.error(__filename, err) 
+                console.error(__filename, err)
                 if( err.code === 'ENOENT'){
                     res.status(404).send("Not Found")
                 }else{
@@ -378,10 +301,10 @@ app.post( '/api/diff' , async function( req, res ) {
     /*
     await dffr.getDiffFile(id, before, after)
               .then( response => {
-                res.send(response) 
+                res.send(response)
               })
               .catch( err => {
-                console.error(__filename, err) 
+                console.error(__filename, err)
                 if( err.code === 'ENOENT'){
                     res.status(404).send("Not Found")
                 }else{

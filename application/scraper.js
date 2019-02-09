@@ -244,66 +244,6 @@ class Scraper {
             baseTag[i].parentNode.removeChild(baseTag[i])
           }
 
-          /*
-                  // img タグのsrcを絶対URIに変更して、ローカルに合わせる
-                  // TODO: ここでやると、現ページ上のsrc属性を書き換えるので、
-                  // 相手サーバーに再度置換したパス（無意味なパス）を読み込みに行くので修正が必要。
-                  const imgTag = html.getElementsByTagName("img") ;
-                  for( let i in imgTag ) {
-                      if( imgTag[i].src ){
-                          if( imgTag[i].src.match( /^data\:/ ) ) {
-                              // 何もしない
-                          }else{
-                              const dirs = imgTag[i].src.split("/");
-                              dirs.shift() ; // httpなどのプロトコル部分を外す
-                              const filename = dirs.pop() ;
-                              const outputPath = dirs.join("/")
-                                                     .replace( /\:/g , "_" ) // ポート部分をアンダースコアに
-                                                     .replace( /\./g , "_" ) // ドット文字もアンダースコアに
-                                                     ;
-                              imgTag[i].src = ( "./" + outputPath + "/" + filename ).replace( /\/\/+/g , "/" ) ;
-                          }
-                          // srcset がある場合 -> 後で考える
-                      }
-                  }
-                  //<source type="image/webp" srcset="/img/img_top_bnr_06_pc.webp">
-                  // source タグのsrcsetを絶対URIに変更して、ローカルに合わせる
-                  const sourceTag = html.getElementsByTagName("source") ;
-                  console.log("st=>",sourceTag)
-                  for( let i in sourceTag ) {
-                      console.log(sourceTag[i].srcset)
-                      if( sourceTag[i].srcset ){
-                          if( sourceTag[i].srcset.match( /^data\:/ ) ) {
-                              // 何もしない
-                          }else{
-                              const dirs = sourceTag[i].srcset.split("/");
-                              dirs.shift() ; // httpなどのプロトコル部分を外す
-                              const filename = dirs.pop() ;
-                              const outputPath = dirs.join("/")
-                                                     .replace( /\:/g , "_" ) // ポート部分をアンダースコアに
-                                                     .replace( /\./g , "_" ) // ドット文字もアンダースコアに
-                                                     ;
-                              sourceTag[i].srcset = ( "./" + outputPath + "/" + filename ).replace( /\/\/+/g , "/" ) ;
-                              console.log(sourceTag[i].srcset)
-                          }
-                      }
-                  }
-                  // link タグの href を絶対URIに変更して、ローカルに合わせる
-                  const linkTag = html.getElementsByTagName("link") ;
-                  for( let i in linkTag ) {
-                      if( linkTag[i].href ){
-                          const dirs = linkTag[i].href.split("/");
-                          dirs.shift() ; // httpなどのプロトコル部分を外す
-                          const filename = dirs.pop() ;
-                          const outputPath = dirs.join("/")
-                                                 .replace( /\:/g    , "_" ) // ポート部分をアンダースコアに
-                                                 .replace( /\./g    , "_" ) // ドット文字もアンダースコアに
-                                                 ;
-                          linkTag[i].href = ( "./" + outputPath + "/" + filename).replace( /\/\/+/g , "/" ) ;
-                      }
-                  }
-                  */
-
           // a タグの href を絶対URIに変更して、ローカルに合わせる
           const aTag = html.getElementsByTagName('a')
           for (let i in aTag) {
@@ -312,15 +252,6 @@ class Scraper {
               aTag[i].removeAttribute('href')
             }
           }
-
-          // form のactionを無効化
-          /*
-                  // iframe タグのsrcを無効化
-                  const iframe = html.getElementsByTagName("iframe") ;
-                  for( let i=0;i<iframe.length;i++){
-                      iframe[i].src = "" ;
-                  } */
-
           // 最終的なHTML
           const resultHtml = document.createElement('html')
           resultHtml.lang = document.documentElement.lang
@@ -329,51 +260,17 @@ class Scraper {
         }, this.save_path)
 
         // prettyしてoriginal htmlとして出力
-        // const pretty = require('pretty');
-        // await this.fs.writeFileSync( `${this.save_path}/original.html`, pretty(html, {ocd: true}) )
         await this.fs.writeFileSync(`${this.save_path}/original.html`, html)
       } catch (err) {
         console.error(err)
         return false
       } finally {
         // 終了
-        console.log('finally'.bgRed)
+        // console.log('finally'.bgRed)
         const preloadFile = this.fs.readFileSync(`${this.save_path}/original.html`, 'utf8')
         const cheerio = require('cheerio')
         const $ = cheerio.load(preloadFile, { decodeEntities: false })
         // thanks http://info-i.net/cheerio-decodeentities
-        /*
-              const replaceUrl = function( src ){
-                  console.log("ORIGINAL",src)
-                  let target ;
-                  // reqUrl が https://hoge.piyo/index.htmlとかの場合、ファイル名がフォルダになるのでとばす
-                  let base = `${parsedUrl.hostname}/${parsedUrl.pathname}`
-                  if( ! base.match( /\/$/ )){
-                      base = base.split("/")
-                      base.pop()
-                      base = base.join("/")
-                  }
-
-                  if( ! src.match( /^(http|https)\:\/\// )){
-                      // ./ ../ / にマッチする場合は、現リクエストを足す
-                      // img/〜 のように先頭が直ディレクトリ名の場合
-                      target = `${base}/${src}`.split("/")
-
-                      console.log( `${src} TO ${target}`)
-                  } else {
-                      // httpなどプロトコル始まりは, プロトコルを飛ばす
-                      target = target.split("/")
-                      target.shift() ; // httpなどのプロトコル部分を外す
-                  }
-                  let filename = target.pop()
-                  filename = filename.split("?")[0]
-                  const outputPath = target.join("/")
-                                           .replace( /\:/g , "_" ) // ポート部分をアンダースコアに
-                                           .replace( /\./g , "_" ) // ドット文字もアンダースコアに
-                                           ;
-                  return ( `./${outputPath}/${filename}` ).replace( /\/\/+/g , "/" ) ;
-              }
-   */
         // img タグのsrcを絶対URIに変更して、ローカルに合わせる
         $('img').each((i, elem) => {
           const src = elem.attribs.src
@@ -409,7 +306,80 @@ class Scraper {
       }
     }
 
+    scheduledScrape (scenarioId) {
+      this.immediatelyScrape(scenarioId)
+    }
+
     async immediatelyScrape (scenarioId) {
+      this
+        ._immediatelyScrape(scenarioId)
+        .then( async res => {
+          console.log( "immediately scraped.".bgCyan,res.result)
+          // const mkdirp = require('mkdirp')
+          const to = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}/`
+          const from = res.scrapedResult.temporarySavePath
+
+          await this.mkdirp(to, async err => {
+            process.stdout.write( `mkdir ${to}`.bgCyan )
+            if(err) throw new Error(err)
+            console.log("...done")
+            // renameし、diff対応
+            await this.fs.rename( from, to, async err => {
+                process.stdout.write( `rename from ${from}\n to ${to}`.bgCyan)
+                if(err) throw new Error(err)
+                console.log("\n...done")
+
+                const Differ = require( `${process.cwd()}/application/differ` ) ;
+                const dffr = new Differ();
+
+                const oldDir = `${res.scenarioBasePath}/${res.scenario.dir}`
+                const newDir = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}`
+
+                // page-diff
+                const oldFilePath = `${oldDir}/index.html`
+                const newFilePath = `${newDir}/index.html`
+                const outputPath  = `${newDir}/diff_${res.scenario.dir}.txt`
+                await dffr.diffFull(oldFilePath, newFilePath, outputPath)
+
+                // image-diff
+                const oldImageFilePath = `${oldDir}/screenshot.png`
+                const newImageFilePath = `${newDir}/screenshot.png`
+                const outputImagePath  = `${newDir}/diff_image_${res.scenario.dir}.png`
+                await dffr.diffImage(oldImageFilePath, newImageFilePath, outputImagePath)
+
+                // part-diff
+                await this.partialExtraction( to , res.scenario.actions )
+                .then( async r => {
+                    const oldFilePath = `${oldDir}/parts.html`
+                    const newFilePath = `${newDir}/parts.html`
+                    const outputPath  = `${newDir}/diff_parts_${res.scenario.dir}.txt`
+                    await dffr.diffFull (oldFilePath, newFilePath, outputPath)
+                })
+            } )
+            console.log("fs.renamed...".bgCyan)
+          } )
+          // console.log("fs.mkdirped...".bgCyan)
+          return res
+        } )
+        .then( async res => {
+          // scenarioのdirを修正
+          const dt = new Date();
+          const scenarioData = {
+              dir: this.save_dir_name,
+              date: dt.getFullYear() + ("00" + (dt.getMonth()+1)).slice(-2) + ("00" + dt.getDate() ).slice(-2),
+              execute: null
+          }
+
+          const Scenario = require( `${process.cwd()}/application/scenario` )
+          const scnr = new Scenario();
+          scnr.setRegisterParameter( scenarioData )
+          const updateScenarioResult = await scnr.updateScenario(scenarioId)
+          if (!updateScenarioResult) throw new Error(`scenario updating error`)
+          console.log( "updateScenarioResult".bgCyan, updateScenarioResult)
+        })
+    }
+
+    async _immediatelyScrape (scenarioId) {
       const Scenario = require(`${process.cwd()}/application/scenario`)
       const scnr = new Scenario()
       const Scheduler = require(`${process.cwd()}/application/scheduler`)
@@ -423,6 +393,12 @@ class Scraper {
         throw new Error(`no scenario @ ${scenarioId}`)
       }
       console.log('scenarioResult', scenarioResult)
+
+      // 1.5 scenario に 実行中フラグを追加
+      scnr.setRegisterParameter( { execute: true } )
+      const updateScenarioResult = await scnr.updateScenario(scenarioId)
+      if (!updateScenarioResult) throw new Error(`scenario updating error`)
+      console.log( "updateScenarioResult".bgCyan, updateScenarioResult)
 
       // 2. スケジュール追加
       const scheduleParam = { scenarioId: scenarioId, scheduled: new Date() }
