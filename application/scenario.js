@@ -50,6 +50,7 @@ class Scenario {
         'url': 1,
         'dir': 1,
         'mail': 1,
+        'execute': 1,
         'date': { '$add': [ '$date', 32400000 ] } // 9*60*60*1000
       } }
       aggregatePrame.push(project)
@@ -104,7 +105,7 @@ class Scenario {
 
       // db.コレクション名.update({検索条件}, {更新内容})
       var result = null
-      console.log('update params', this.param)
+      // console.log('update params', this.param)
       await collection.updateOne({ '_id': ObjectId(id) }, { $set: this.param })
         .then(res => {
           if (res.result.nModified !== 1) throw new Error('update is failed!!')
@@ -127,7 +128,7 @@ class Scenario {
       var result = null
       await collection.updateOne({ '_id': ObjectId(id) }, { $set: { delete: true } })
         .then(res => {
-          console.log(res.result)
+          // console.log(res.result)
           if (res.result.nModified !== 1) throw new Error(`[${id}] update is failed!!`)
         })
         .catch(err => console.error(err))
@@ -156,12 +157,14 @@ class Scenario {
         // date
         if (typeof param.date !== 'undefined') {
           if (param.date) {
-            const tmpData = param.date.trim().replace(/\//g, '-')
-            this.param.date = new Date(`${tmpData}T00:00:00+09:00`)
+            let tmpDate = param.date.trim().replace(/\//g, '-')
+            if (/^[0-9]{8}$/.exec(tmpDate)) {
+              tmpDate = `${tmpDate.substr(0,4)}-${tmpDate.substr(4,2)}-${tmpDate.substr(6,2)}`
+            }
+            this.param.date = new Date(`${tmpDate}T00:00:00+09:00`)
           } else {
             this.param.date = null
           }
-          // this.param.date = ( param.date ) ? param.date.trim().replace( /\//g , "-" ) : null
         }
         // notify
         if (typeof param.notify !== 'undefined') {
@@ -180,8 +183,12 @@ class Scenario {
           this.param.actions = (param.actions) ? param.actions : null
         }
         // delete
-        if (typeof param.url !== 'undefined') {
+        if (typeof param.delete !== 'undefined') {
           this.param.delete = !!(param.delete)
+        }
+        // execute
+        if (typeof param.execute !== 'undefined') {
+          this.param.execute = !!(param.execute)
         }
       } else {
         console.error('not object', param)
@@ -245,7 +252,7 @@ class Scenario {
       console.log(`mkdir ${toDir}`.bgCyan)
       console.log(`rename ${fromDir} to ${toDir}`.bgCyan)
       await fs.renameSync(fromDir, toDir)
-      console.log('rename end'.bgGreen)
+      // console.log('rename end'.bgGreen)
       return true
     }
   }

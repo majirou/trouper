@@ -102,9 +102,11 @@ export default {
         return 0
       }
       let row = this.table.getSelectedData()
-      if (row.length === 1) {
+      if (row.length === 1 && row[0].execute !== true) {
         this.showCrawlingDialog = true
         console.log(this)
+      } else {
+        console.error(1)
       }
       console.log(event, this.table.getSelectedData())
     },
@@ -136,6 +138,7 @@ export default {
           })
           .catch(err => console.error(err))
           .then(() => this.$unlock())
+          .then(() => this.reload())
       }
     },
     deleteScenario: function () {
@@ -172,10 +175,14 @@ export default {
           cellClick: (e, cell) => this.$router.push(`/edit/${cell._cell.row.data._id}`)
         },
         { title: 'シナリオ名', field: 'name', width: 400 },
-        { title: '次回予定日', field: 'date', width: 100, formatter: cell => cell.getValue().substring(0, 10) },
-        // { title: '最終実施日', field: 'execDate' },
+        { title: '次回予定日',
+          field: 'date',
+          width: 110,
+          formatter: cell => ((cell._cell.row.data.execute === true) ? '<i class="fas fa-swimmer mr-2"></i>クロール中' : cell.getValue().substring(0, 10))
+        },
         { title: 'DIR', field: 'dir', width: 150 },
         { title: 'URL', field: 'url' },
+        { title: 'exe', field: 'execute', visible: false },
         { formatter: () => '<i class="fas fa-trash"></i>',
           width: 40,
           align: 'center',
@@ -192,6 +199,14 @@ export default {
         const ak = row._row.data._id
         this.$router.push({ path: `/review/${ak}` })
       },
+      rowFormatter (row) {
+        const data = row.getData()
+
+        if (data != null && data.execute != null && data.execute === true) {
+          row.getElement().classList.add('executing')
+        }
+      },
+      // ajax
       ajaxURL: `${this.$apiUrl}/scenarios`,
       ajaxProgressiveLoad: 'scroll',
       ajaxProgressiveLoadDelay: 200,
@@ -222,6 +237,11 @@ export default {
     }
   }
   .tabulator-row{
+    &.executing{
+      background-color: #FFC000;
+      color:#FFF !important;
+    }
+
     &.tabulator-selected{
       background-color: #007bff;
       color:#FFF !important;
