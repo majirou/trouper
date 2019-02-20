@@ -311,23 +311,23 @@ class Scraper {
     }
 
     async immediatelyScrape (scenarioId) {
-      this
+      await this
         ._immediatelyScrape(scenarioId)
         .then( async res => {
-          console.log( "immediately scraped.".bgCyan,res.result)
+          console.log( "immediately scraped.".bgCyan)
           // const mkdirp = require('mkdirp')
           const to = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}/`
           const from = res.scrapedResult.temporarySavePath
 
           await this.mkdirp(to, async err => {
-            process.stdout.write( `mkdir ${to}`.bgCyan )
+            // process.stdout.write( `mkdir ${to}`.bgCyan )
             if(err) throw new Error(err)
-            console.log("...done")
+            // console.log("...done")
             // renameし、diff対応
             await this.fs.rename( from, to, async err => {
-                process.stdout.write( `rename from ${from}\n to ${to}`.bgCyan)
+                process.stdout.write( `rename from ${from}\n to ${to}¥n`.bgCyan)
                 if(err) throw new Error(err)
-                console.log("\n...done")
+                // console.log("\n...done")
 
                 const Differ = require( `${process.cwd()}/application/differ` ) ;
                 const dffr = new Differ();
@@ -336,18 +336,21 @@ class Scraper {
                 const newDir = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}`
 
                 // page-diff
+                console.log("page-diff")
                 const oldFilePath = `${oldDir}/index.html`
                 const newFilePath = `${newDir}/index.html`
                 const outputPath  = `${newDir}/diff_${res.scenario.dir}.txt`
                 await dffr.diffFull(oldFilePath, newFilePath, outputPath)
 
                 // image-diff
+                console.log("image-diff")
                 const oldImageFilePath = `${oldDir}/screenshot.png`
                 const newImageFilePath = `${newDir}/screenshot.png`
                 const outputImagePath  = `${newDir}/diff_image_${res.scenario.dir}.png`
                 await dffr.diffImage(oldImageFilePath, newImageFilePath, outputImagePath)
 
                 // part-diff
+                console.log("part-diff")
                 await this.partialExtraction( to , res.scenario.actions )
                 .then( async r => {
                     const oldFilePath = `${oldDir}/parts.html`
@@ -377,6 +380,9 @@ class Scraper {
           if (!updateScenarioResult) throw new Error(`scenario updating error`)
           console.log( "updateScenarioResult".bgCyan, updateScenarioResult)
         })
+        .catch( err => {
+          console.error(__filename, err)
+        } )
     }
 
     async _immediatelyScrape (scenarioId) {
@@ -393,7 +399,6 @@ class Scraper {
         throw new Error(`no scenario @ ${scenarioId}`)
       }
       console.log('scenarioResult', scenarioResult)
-
       // 1.5 scenario に 実行中フラグを追加
       scnr.setRegisterParameter( { execute: true } )
       const updateScenarioResult = await scnr.updateScenario(scenarioId)
@@ -444,9 +449,10 @@ class Scraper {
     }
 
     async partialExtraction (dir, actions) {
-      console.log('partialExtraction'.bgRed, dir, actions)
+      console.log('partialExtraction...'.bgRed )
+      console.log(dir.bgRed) // , actions)
       // partialExtraction
-      const preloadFile = this.fs.readFileSync(`${dir}/index.html`, 'utf8')
+      const preloadFile = await this.fs.readFileSync(`${dir}/index.html`, 'utf8')
       const cheerio = require('cheerio')
       const $ = cheerio.load(preloadFile, { decodeEntities: false })
       // thanks http://info-i.net/cheerio-decodeentities

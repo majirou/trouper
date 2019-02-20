@@ -11,6 +11,7 @@ class Scenario {
       this.id = null
       this.renamedDir = null
       this.colors = require('colors')
+      this.fs = require("fs")
     }
 
     async getScenarios (param) {
@@ -25,14 +26,14 @@ class Scenario {
       }
       const lastPage = Math.ceil(await collection.find().count() / param.limit)
 
-      const aggregatePrame = []
+      const aggregateParam = []
 
       const match = {
         '$match': {
           'delete': { '$ne': true }
         }
       }
-      aggregatePrame.push(match)
+      aggregateParam.push(match)
 
       if (param.multiSearch) {
         const regexp = new RegExp(param.multiSearch) //, 'g')
@@ -41,7 +42,12 @@ class Scenario {
             '$or': [ { name: regexp }, { url: regexp } ]
           }
         }
-        aggregatePrame.push(search)
+        aggregateParam.push(search)
+      }
+      if (param.date) {
+        aggregateParam.push({
+          '$match': { date: param.date }
+        })
       }
 
       const project = { '$project': {
@@ -51,20 +57,23 @@ class Scenario {
         'dir': 1,
         'mail': 1,
         'execute': 1,
+        'interval': 1,
+        'notify': 1,
         'date': { '$add': [ '$date', 32400000 ] } // 9*60*60*1000
       } }
-      aggregatePrame.push(project)
+      aggregateParam.push(project)
 
       if (param.sort != null) {
         const sort = { '$sort': param.sort }
-        aggregatePrame.push(sort)
+        aggregateParam.push(sort)
       }
       const skip = { '$skip': param.skip }
-      aggregatePrame.push(skip)
+      aggregateParam.push(skip)
       const limit = { '$limit': param.limit }
-      aggregatePrame.push(limit)
+      aggregateParam.push(limit)
 
-      const data = await collection.aggregate(aggregatePrame).toArray()
+      // console.log(aggregateParam);
+      const data = await collection.aggregate(aggregateParam).toArray()
 
       client.close()
       return { last_page: lastPage, data }
@@ -77,7 +86,8 @@ class Scenario {
       // const collection = await client.db( 'scraper_db' ).collection( 'scenario' )
       const collection = await client.db(this.databaseName).collection(this.collectionName)
       const data = await collection.find({ '_id': ObjectId(id) }).toArray()
-      // console.log("getScenario",id, data)
+      // console.log("getScenario".bgCyan,id, data)
+      await client.close()
       return (data.length === 1) ? data[0] : null
     }
 
@@ -139,7 +149,7 @@ class Scenario {
       return result
     }
 
-    setRegisterParameter (param) {
+    async setRegisterParameter (param) {
       if (typeof param === 'object') {
         this.param = {}
         // url
@@ -160,6 +170,11 @@ class Scenario {
             let tmpDate = param.date.trim().replace(/\//g, '-')
             if (/^[0-9]{8}$/.exec(tmpDate)) {
               tmpDate = `${tmpDate.substr(0,4)}-${tmpDate.substr(4,2)}-${tmpDate.substr(6,2)}`
+            }else{
+              tmpDate = tmpDate.split('-')
+              tmpDate = tmpDate[0] + '-' +
+                        ('00'+tmpDate[1]).slice(-2) + '-' +
+                        ('00'+tmpDate[2]).slice(-2)
             }
             this.param.date = new Date(`${tmpDate}T00:00:00+09:00`)
           } else {
@@ -195,7 +210,7 @@ class Scenario {
       }
     }
 
-    validateRegisterParameter () {
+    async validateRegisterParameter () {
       // console.log( "validation" )
       this.errors = []
 
@@ -237,12 +252,10 @@ class Scenario {
     }
 
     async createNewScenarioDirectory (scenarioId, temporaryDir) {
-      var fs = require('fs')
-      var mkdirp = require('mkdirp')
-      var path = require('path')
-
+      // var fs = require('fs')
+      const mkdirp = require('mkdirp')
+      const path = require('path')
       const baseDir = path.resolve('./public_html/data')
-
       const toDir = `${baseDir}/scenario/${scenarioId}/${temporaryDir}`
       const fromDir = `${baseDir}/tmp/${temporaryDir}`
 
@@ -251,9 +264,62 @@ class Scenario {
       await mkdirp.sync(toDir)
       console.log(`mkdir ${toDir}`.bgCyan)
       console.log(`rename ${fromDir} to ${toDir}`.bgCyan)
-      await fs.renameSync(fromDir, toDir)
+      await this.fs.renameSync(fromDir, toDir)
       // console.log('rename end'.bgGreen)
       return true
+    }
+
+    async checkDiff (id, dir) {
+      const path = require('path')
+      const baseDir = path.resolve('./public_html/data')
+      const targetDir = `${baseDir}/scenario/${id}/${dir}`
+      // console.log("check diff...")
+      // notify を取得する
+      const result =
+        await this.getScenario(id)
+          .then( async res => {
+            const fileList = this.fs.readdirSync(`${targetDir}/`)
+
+            res.diff = {}
+
+            if( ( res.notify.find( n => n === 1) ) ) {
+              // console.log("\tcheck page diff".bgCyan)
+              const d1 = fileList.find( f => /^diff_[0-9]+\.txt$/.exec(f) )
+              if (d1 != null) {
+                const diff1 = this.fs.readFileSync(`${targetDir}/${d1}`).toString()
+                if (diff1) {
+                  res.diff.page = ( diff1.toString().split('\n').length > 4 )
+                }
+              }
+              // console.log("\tdiff1 end".bgRed);
+            }
+            if( ( res.notify.find( n => n === 2) ) ) {
+              // console.log("\tcheck part diff".bgCyan)
+              const d2 = fileList.find( f => /^diff_parts_[0-9]+\.txt$/.exec(f) )
+              if (d2 != null) {
+                const diff2 = this.fs.readFileSync(`${targetDir}/${d2}`).toString()
+                if (diff2) {
+                  res.diff.part = ( diff2.toString().split('\n').length > 4 )
+                }
+              }
+              // console.log("\tdiff2 end".bgRed);
+            }
+            if( ( res.notify.find( n => n === 4) ) ) {
+              // console.log("\tcheck image diff".bgCyan)
+              // diff_image_20190215021330
+              const d3 = fileList.find( f => /^diff_image_[0-9]+\.png\.txt$/.exec(f) )
+              if (d3 != null) {
+                const diff3 = this.fs.readFileSync(`${targetDir}/${d3}`).toString()
+                if(diff3){
+                  res.diff.image = (diff3.toString().split('\n')[1] != 0 )
+                }
+              }
+              // console.log("\tdiff3 end".bgRed);
+            }
+            return res
+            // console.log(targetDir,res)
+          })
+      return result
     }
   }
 

@@ -6,7 +6,8 @@
           i.far.fa-window-minimize.fa-fw.mr-1(@click="maximizeImage()")
           i.far.fa-window-maximize.fa-fw(@click="maximizeImage(1)" :class="{disable: isMaximum(1)}")
           i.far.fa-clone.fa-fw(@click="toggleFilter(1)")
-          span.old.ml-auto.mr-0.rounded.px-2 {{currTimestamp}}
+          div.ml-auto.mr-0
+            span.old.rounded.px-2 {{prevTimestamp}}
         div(style="position:relative")
           img.w-100.border(:src="prevImageSource")
           img.w-100.border(:src="diffImageSource" style="position:absolute;left:0;opacity:.75" :class="{'d-none':!isFiltered(1)}")
@@ -15,7 +16,8 @@
           i.far.fa-window-minimize.fa-fw.mr-1(@click="maximizeImage()")
           i.far.fa-window-maximize.fa-fw(@click="maximizeImage(2)" :class="{disable: isMaximum(2)}")
           i.far.fa-clone.fa-fw(@click="toggleFilter(2)")
-          span.new.ml-auto.mr-0.rounded.px-2 {{prevTimestamp}}
+          div.ml-auto.mr-0
+            span.new.rounded.px-2 {{currTimestamp}}
         div(style="position:relative")
           img.w-100.border(:src="currImageSource")
           img.w-100.border(:src="diffImageSource" style="position:absolute;left:0;opacity:.75" :class="{'d-none':!isFiltered(2)}")

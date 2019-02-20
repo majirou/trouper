@@ -19,7 +19,7 @@ class Scheduler {
 
       await collection.insertOne(this.param)
         .then(res => {
-          console.log('inserted', res.result)
+          console.log('INSERTED'.bgGreen, res.result)
           this.id = res.insertedId
         })
         .catch(err => console.error(err))
@@ -114,7 +114,34 @@ class Scheduler {
       const ObjectId = require('mongodb').ObjectID
 
       // scenarioId
-      this.param.scenarioId = (param.scenarioId) ? ObjectId(param.scenarioId.trim()) : null
+      if(typeof param.scenarioId !== 'undefined') {
+        this.param.scenarioId = (param.scenarioId)?ObjectId(param.scenarioId.trim()):null
+      }
+      // notified
+      if(typeof param.notified !== 'undefined') {
+        this.param.notified = (param.notified)?param.notified:null
+      }
+      // executed
+      if(typeof param.executed !== 'undefined') {
+        this.param.executed = (param.executed)?param.executed:null
+      }
+    }
+
+    async deleteNotExecutedSchedule(){
+      const client = await this.mongo.connect(this.url, { useNewUrlParser: true })
+      const collection = await client.db(this.databaseName).collection(this.collectionName)
+      this.result = null
+      await collection.deleteMany({executed:null})
+        .then(res => {
+          console.log("DELETED".bgRed,res.result)
+          if (res.result.ok !== 1) throw new Error('delete is failed!!')
+          this.result = true
+        })
+        .catch(err => console.error(err))
+        .then(() => {
+          if (client) client.close()
+        })
+      return this.result
     }
   }
 

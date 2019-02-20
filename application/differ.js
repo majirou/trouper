@@ -18,8 +18,8 @@ class Differ {
       const _output = this.path.resolve(outputPath)
 
       const execDiff = async (before, after, output) => {
-        const oldStr = this.fs.readFileSync(before).toString()
-        const newStr = this.fs.readFileSync(after).toString()
+        const oldStr = await this.fs.readFileSync(before).toString()
+        const newStr = await this.fs.readFileSync(after).toString()
         const diff = require('diff')
         const unifiedDiff = await diff.createTwoFilesPatch(
           beforePath,
@@ -29,7 +29,7 @@ class Differ {
           'OLD',
           'NEW'
         )
-        this.fs.writeFile(output, unifiedDiff, err => {
+        await this.fs.writeFile(output, unifiedDiff, async err => {
           if (err) {
             console.error(err)
           } else {
@@ -47,9 +47,7 @@ class Differ {
         return 0
       }
 
-      await execDiff(_before, _after, _output).then(res => {
-        console.log('execDiff then', res)
-      })
+      await execDiff(_before, _after, _output)
     }
     // dffr.diffPart()
     async diffImage (beforePath, afterPath, outputPath) {
@@ -63,18 +61,26 @@ class Differ {
           file: output,
           tolerance: 0.02
         }
-        gm().compare(before, after, options, (err, isEqual, equality, raw, path1, path2) => {
+        await gm().compare(before, after, options, async (err, isEqual, equality, raw, path1, path2) => {
           if (err) {
             console.error(err)
             return 0
           }
-          // if the images were considered equal, `isEqual` will be true, otherwise, false.
-          console.log('The images were equal: %s', isEqual)
-          // to see the total equality returned by graphicsmagick we can inspect the `equality` argument.
-          console.log('Actual equality: %d', equality)
-          console.log('raw', raw)
 
-          // inspect the raw output
+          const diffText = isEqual + '\n' + // isEqual
+                           equality + '\n' + // Actual equality:
+                           raw // raw
+
+          // output equal info to txt
+          this.fs.writeFile(`${output}.txt`, diffText, async err => {
+            if (err) {
+              console.error(err)
+            } else {
+              console.log(`DIFF INFO FILE: ${output}.txt is outputed`.bgGreen)
+            }
+          })
+
+          return 1
         })
       }
 
@@ -87,6 +93,7 @@ class Differ {
         return 0
       }
       await execDiff(_before, _after, _output)
+      return 1
     }
 
     async getDiffFile (id, before, after) {

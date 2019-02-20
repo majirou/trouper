@@ -131,6 +131,7 @@ app.post( '/api/scenario' , async function( req, res ) {
             // スケジュール更新 exec, done , saveをセットしてアップデートする
             scheduleParam.executed = new Date()
             scheduleParam.done = new Date()
+            scheduleParam.notified = new Date()
             scheduleParam.saveDir = req.body.dir
             scdl.setRegisterParameter( scheduleParam )
             const updateResult = await scdl.updateSchedule(addResultScheduleId)
@@ -297,19 +298,4 @@ app.post( '/api/diff' , async function( req, res ) {
                     res.status(400).send("Bad Request")
                 }
               } )
-
-    /*
-    await dffr.getDiffFile(id, before, after)
-              .then( response => {
-                res.send(response)
-              })
-              .catch( err => {
-                console.error(__filename, err)
-                if( err.code === 'ENOENT'){
-                    res.status(404).send("Not Found")
-                }else{
-                    res.status(400).send("BadRequest")
-                }
-              } )
-              */
 } )
