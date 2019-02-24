@@ -299,3 +299,12 @@ app.post( '/api/diff' , async function( req, res ) {
                 }
               } )
 } )
+
+// if direct access review page, redirect index.html and router push it
+app.get( '/cli/review/:id' , async function( req, res ) {
+    if (req.params.id) {
+        res.redirect(302, `/cli/?backto=/review/${req.params.id}`);
+    } else {
+        res.status(400).send("Bad Request")
+    }
+} )

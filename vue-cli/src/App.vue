@@ -12,6 +12,26 @@
     router-view
 </template>
 
+<script>
+export default {
+  name: 'MainApp',
+  mounted () {
+    const qs = document.location.search
+    if (qs != null && qs !== '') {
+      const hash = qs.slice(1).split('&').filter(m => {
+        const _m = m.split('=')
+        return (_m[0] === 'backto') ? _m[1].replace(/%2F/g, '/') : false
+      })
+      console.log(hash)
+      if (hash.length === 1) {
+        const redirectUrl = hash.pop().split('=')[1].replace(/%2F/g, '/')
+        this.$router.push(redirectUrl)
+      }
+    }
+  }
+}
+</script>
+
 <style lang="scss">
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
