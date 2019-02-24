@@ -96,8 +96,10 @@ class Differ {
       return 1
     }
 
-    async getDiffFile (id, before, after) {
-      const filepath = this.path.resolve(`./public_html/data/scenario/${id}/${after}/diff_${before}.txt`)
+    async getDiffFile (id, before, after, type) {
+      // console.log("getDiffFile", type, typeof type , ( type === 1 ) )
+      const filename = ( parseInt(type) === 1 ) ? `diff_${before}.txt` : `diff_parts_${before}.txt`
+      const filepath = this.path.resolve(`./public_html/data/scenario/${id}/${after}/${filename}`)
       const data = this.fs.readFileSync(filepath)
       return data.toString()
     }

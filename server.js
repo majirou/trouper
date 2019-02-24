@@ -252,11 +252,12 @@ app.get( '/api/diff' , async function( req, res ) {
     const id = req.query.id
     const after = req.query.after
     const before = req.query.before
+    const type = req.query.type
 
     const Differ = require('./application/differ' ) ;
     const dffr = new Differ();
 
-    await dffr.getDiffFile(id, before, after)
+    await dffr.getDiffFile(id, before, after, type)
               .then( response => {
                 res.send(response)
               })
@@ -269,7 +270,6 @@ app.get( '/api/diff' , async function( req, res ) {
                 }
               } )
 } )
-
 
 app.post( '/api/diff' , async function( req, res ) {
     const id = req.body.scenarioId

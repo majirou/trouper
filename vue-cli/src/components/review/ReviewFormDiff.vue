@@ -1,42 +1,42 @@
 <template lang="pug">
   section.diff-panel.p-2.border.border-gray.border-top-0
-    div.d-flex(:class="{adjuster: closeDiffPanelFlag===0}")
-      div.w-100.mr-1(v-show="expandIframeFlag!==2")
-        div.mb-1.d-flex.justify-content-start
+    .d-flex(:class="{adjuster: closeDiffPanelFlag===0}")
+      .w-100.mr-1(v-show="expandIframeFlag!==2")
+        .mb-1.d-flex.justify-content-start
           i.btn.fas.fa-chevron-left.fa-fw(@click="contractIframe()" v-show="expandIframeFlag===1")
           i.btn.fas.fa-chevron-right.fa-fw(@click="expandIframe(1)" v-show="expandIframeFlag===0")
           i.btn.fas.fa-chevron-up.fa-fw(@click="openDiffPanel()" v-show="closeDiffPanelFlag!==0")
           i.btn.fas.fa-chevron-down.fa-fw(@click="closeDiffPanel(1)" v-show="closeDiffPanelFlag===0")
-          div.ml-auto.mr-0
+          .ml-auto.mr-0
             i.btn.fas.fa-external-link-alt.mr-2(@click="openLink(prevIframeSource,true)")
             span.old.rounded.px-2 {{prevTimestamp}}
-      div.w-100(v-show="expandIframeFlag!==1")
-        div.mb-1.d-flex.justify-content-start
+      .w-100(v-show="expandIframeFlag!==1")
+        .mb-1.d-flex.justify-content-start
           i.btn.fas.fa-chevron-right.fa-fw(@click="contractIframe()" v-show="expandIframeFlag===2")
           i.btn.fas.fa-chevron-left.fa-fw(@click="expandIframe(2)" v-show="expandIframeFlag===0")
           i.btn.fas.fa-chevron-up.fa-fw(@click="openDiffPanel()" v-show="closeDiffPanelFlag!==0")
           i.btn.fas.fa-chevron-down.fa-fw(@click="closeDiffPanel(2)" v-show="closeDiffPanelFlag===0")
-          div.ml-auto.mr-0
+          .ml-auto.mr-0
             i.btn.fas.fa-external-link-alt.mr-2(@click="openLink(currIframeSource,true)")
             span.new.rounded.px-2 {{currTimestamp}}
     transition(name="fade")
-      div.d-flex.justify-content-between.h-100
+      .d-flex.justify-content-between.h-100
         transition(name="fade")
-          div.w-100.mr-1(v-show="expandIframeFlag!==2")
+          .w-100.mr-1(v-show="expandIframeFlag!==2")
             iframe.w-100.h-100.border.border-gray(
               :src="prevIframeSource"
               @load="iframeLoaded"
               :id="prevIframeId"
             )
         transition(name="fade")
-          div.w-100(v-show="expandIframeFlag!==1")
+          .w-100(v-show="expandIframeFlag!==1")
             iframe.w-100.h-100.border.border-gray(
               :src="currIframeSource"
               @load="iframeLoaded"
               :id="currIframeId"
             )
     transition(name="fade")
-      div.bg-white(
+      .bg-white(
         v-show="closeDiffPanelFlag===0"
         style="z-index:10000"
         v-html="diff2htmlPanel"
@@ -67,10 +67,12 @@ export default {
   props: ['currTarget', 'prevTarget', 'fileName', 'currTimestamp', 'prevTimestamp'],
   methods: {
     getDiffHtml: function () {
+      const type = (this.fileName === 'index.html') ? 1 : 2
       const targetUrl = `${this.$apiUrl}/diff/` +
                         `?id=${this.currTarget.scenarioId}` +
                         `&after=${this.currTarget.saveDir}` +
-                        `&before=${this.prevTarget.saveDir}`
+                        `&before=${this.prevTarget.saveDir}` +
+                        `&type=${type}`
       axios.get(targetUrl)
         .then(res => {
           if (res.status === 200) {
