@@ -46,7 +46,9 @@
                     input(type="checkbox" :value="v.value" v-model="notification")
               div.col-8.form-group
                 label Mail:
-                input.form-control(type="email" v-model="notificationMail")
+                // input.form-control(type="email" v-model="notificationMail")
+                select.form-control(v-model="notificationMail")
+                  option(v-for="(v,i) in users" :value="v.mail") {{v.mail}}
             div.alert.alert-danger.my-1(v-show="errors.length>0")
               ul.mb-0.pl-3
                 li(v-for="(v,i) in errors" :key="i") {{v}}
@@ -56,6 +58,8 @@
 </template>
 
 <script>
+import users from '@/../config/users.js'
+
 export default {
   name: 'Scenario',
   data () {
@@ -70,7 +74,8 @@ export default {
       notificationMail: null,
       nextCrawlingDate: null,
       interval: 1, // 1: weekly , 2: monthly
-      errors: []
+      errors: [],
+      users: users.data
     }
   },
   props: ['showModal', 'url', 'siteTitle', 'registeringErrors', 'dir', 'scenario', 'type'],
