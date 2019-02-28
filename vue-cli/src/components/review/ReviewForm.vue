@@ -10,8 +10,12 @@
       li.nav-item
         input#tab-image( type="radio" value="3" v-model="tabId")
         label.nav-link( :class="{active: isActiveTab(3)}" for="tab-image") 画像
+      li.nav-item
+        input#tab-history( type="radio" value="4" v-model="tabId")
+        label.nav-link( :class="{active: isActiveTab(4)}" for="tab-history") 履歴
       li.nav-item.ml-auto.mr-0
-        label.nav-link.active {{scenarioName}}
+        input#tab-edit( type="radio" value="5" v-model="tabId")
+        label.nav-link( :class="{active: isActiveTab(5)}" for="tab-edit") {{scenarioName}}
     PageDiffPanel(
       v-show="isActiveTab(1)"
       :style="{height: panelHeight}"
@@ -41,7 +45,20 @@
       :prevTimestamp="previousTimestamp"
       :fileName="imageDiffFileName"
     )
-
+    History(
+      v-show="isActiveTab(4)"
+      :style="{height: panelHeight}"
+      :scenarioId="scenarioId"
+      :currTarget="targetSchedule"
+      :prevTarget="previousSchedule"
+      :currTimestamp="targetTimestamp"
+      :prevTimestamp="previousTimestamp"
+    )
+    ScenarioEdit.p-2.border.border-gray.border-top-0(
+      v-show="isActiveTab(5)"
+      :style="{height: panelHeight}"
+      :scenarioId="scenarioId"
+    )
     RedoDiffDialog(:showDialog="showDialog" @cancel="closeDialog" @ok="doDiff")
       div(slot="header")
         i.fas.fa-question-circle.mr-2
@@ -68,6 +85,9 @@
 import CommonDialog from '@/components/common/CommonDialog'
 import DiffPanel from '@/components/review/ReviewFormDiff'
 import DiffImage from '@/components/review/ReviewFormImage'
+import History from '@/components/review/ReviewFormHistory'
+import ScenarioEdit from '@/components/scenario/ScenarioForm'
+
 // import { Diff2Html } from 'diff2html'
 import 'diff2html/dist/diff2html.min.css'
 
@@ -80,7 +100,9 @@ export default {
     'ErrorDialog': CommonDialog,
     'PageDiffPanel': DiffPanel,
     'PartDiffPanel': DiffPanel,
-    DiffImage
+    DiffImage,
+    History,
+    ScenarioEdit
   },
   data () {
     return {
@@ -219,24 +241,22 @@ export default {
 <style lang="scss" scoped>
 .nav{
   li{
-    &:last-child{
-      label{
-        background-color: #dee2e6;
-        width: auto;
-        &:hover{
-          background-color: #dee2e6;
-        }
-      }
-    }
     label {
+      background-color: #F6F6F6;
+      border-color: #dee2e6;
       text-align: center;
-      margin-bottom: 0px !important;
-      border-bottom: none;
+      margin-bottom: 0 !important;
+      margin-right: 2px;
+      // border-bottom: 1px solid #999;
       width: 6em;
       font-size:.75em;
       cursor: pointer;
       &:hover{
         background-color:#FFF;
+      }
+      &:last-child{
+        width: auto;
+        margin-right: 0;
       }
     }
   }

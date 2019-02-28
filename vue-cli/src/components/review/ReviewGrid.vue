@@ -172,7 +172,11 @@ export default {
         { formatter: () => '<i class="fas fa-edit"></i>',
           width: 40,
           align: 'center',
-          cellClick: (e, cell) => this.$router.push(`/edit/${cell._cell.row.data._id}`)
+          // cellClick: (e, cell) => this.$router.push(`/edit/${cell._cell.row.data._id}`)
+          cellClick: (e, cell) => {
+            const ak = cell._cell.row.data._id
+            this.$router.push({ path: `/review/${ak}` })
+          }
         },
         { title: 'シナリオ名', field: 'name', width: 400 },
         { title: '次回予定日',

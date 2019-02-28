@@ -191,7 +191,6 @@ app.delete( '/api/scenario/:id' , async function( req, res ) {
 } )
 
 // スケジュール取得
-
 app.get( '/api/schedules/:scenarioId/recent', async function (req, res) {
     // 直近の２件を取得
     try{
@@ -219,20 +218,32 @@ app.get( '/api/schedule/:scenarioId/:id', function (req, res) {
     }
 } )
 
+// 履歴スケジュール取得
+app.get( '/api/history/:scenarioId', async function (req, res) {
+    try{
+        const Scheduler = require( './application/scheduler' )
+        const scdl = new Scheduler()
+        scdl.setSearchParameter( {scenarioId: req.params.scenarioId} )
+        const result = await scdl.getSchedules(  { skip:0, limit: 100, sort: {done: -1} } )
+        res.json( result.data )
+    } catch( err ) {
+        console.log( "error" , err);
+        res.sendStatus(400).send("BadRequest")
+    }
+} )
+
 // 即時スケジュール追加
 app.post( '/api/schedule/now', async function (req, res) {
     // console.log(req.body)
     try{
-        if (!req.body.id) {
-            throw new Error("no id")
-        }
+        if (!req.body.id)  throw new Error("no id")
         const scenarioId = req.body.id
 
-        const Scraper = require('./application/scraper' ) ;
+        const Scraper = require('./application/scraper' )
         const s = new Scraper();
         await s.immediatelyScrape(scenarioId)
     } catch( err ) {
-        console.error( "error".bgRed , err);
+        console.error( "error".bgRed , err)
     } finally {
         // 結果を返答
         res.send("end")
