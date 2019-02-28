@@ -307,61 +307,82 @@ class Scraper {
     }
 
     scheduledScrape (scenarioId) {
-      this.immediatelyScrape(scenarioId)
+      this._scrape(scenarioId)
+      .then( async res => {
+        console.log( "scheduled scraped.".bgCyan)
+        await this._diff(res)
+        return res
+      } )
+      .then( async res => {
+        // scenarioのdirを修正
+        // const dt = new Date();
+        const scenarioData = {
+            dir: this.save_dir_name,
+            // date: dt.getFullYear() + ("00" + (dt.getMonth()+1)).slice(-2) + ("00" + dt.getDate() ).slice(-2),
+            execute: null
+        }
+
+        const Scenario = require( `${process.cwd()}/application/scenario` )
+        const scnr = new Scenario();
+        scnr.setRegisterParameter( scenarioData )
+        const updateScenarioResult = await scnr.updateScenario(scenarioId)
+        if (!updateScenarioResult) throw new Error(`scenario updating error`)
+        console.log( "updateScenarioResult".bgCyan, updateScenarioResult)
+      })
+    }
+
+    async _diff (res) {
+      const to = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}/`
+      const from = res.scrapedResult.temporarySavePath
+
+      await this.mkdirp(to, async err => {
+        if(err) throw new Error(err)
+        // renameし、diff対応
+        await this.fs.rename( from, to, async err => {
+            process.stdout.write( `rename from ${from}\n to ${to}¥n`.bgCyan)
+            if(err) throw new Error(err)
+            // console.log("\n...done")
+
+            const Differ = require( `${process.cwd()}/application/differ` ) ;
+            const dffr = new Differ();
+
+            const oldDir = `${res.scenarioBasePath}/${res.scenario.dir}`
+            const newDir = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}`
+
+            // page-diff
+            console.log("page-diff")
+            const oldFilePath = `${oldDir}/index.html`
+            const newFilePath = `${newDir}/index.html`
+            const outputPath  = `${newDir}/diff_${res.scenario.dir}.txt`
+            await dffr.diffFull(oldFilePath, newFilePath, outputPath)
+
+            // image-diff
+            console.log("image-diff")
+            const oldImageFilePath = `${oldDir}/screenshot.png`
+            const newImageFilePath = `${newDir}/screenshot.png`
+            const outputImagePath  = `${newDir}/diff_image_${res.scenario.dir}.png`
+            await dffr.diffImage(oldImageFilePath, newImageFilePath, outputImagePath)
+
+            // part-diff
+            console.log("part-diff")
+            await this.partialExtraction( to , res.scenario.actions )
+            .then( async r => {
+                const oldFilePath = `${oldDir}/parts.html`
+                const newFilePath = `${newDir}/parts.html`
+                const outputPath  = `${newDir}/diff_parts_${res.scenario.dir}.txt`
+                await dffr.diffFull (oldFilePath, newFilePath, outputPath)
+            })
+        } )
+        console.log("fs.renamed...".bgCyan)
+      } )
     }
 
     async immediatelyScrape (scenarioId) {
       await this
-        ._immediatelyScrape(scenarioId)
+        ._scrape(scenarioId)
         .then( async res => {
           console.log( "immediately scraped.".bgCyan)
-          // const mkdirp = require('mkdirp')
-          const to = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}/`
-          const from = res.scrapedResult.temporarySavePath
-
-          await this.mkdirp(to, async err => {
-            // process.stdout.write( `mkdir ${to}`.bgCyan )
-            if(err) throw new Error(err)
-            // console.log("...done")
-            // renameし、diff対応
-            await this.fs.rename( from, to, async err => {
-                process.stdout.write( `rename from ${from}\n to ${to}¥n`.bgCyan)
-                if(err) throw new Error(err)
-                // console.log("\n...done")
-
-                const Differ = require( `${process.cwd()}/application/differ` ) ;
-                const dffr = new Differ();
-
-                const oldDir = `${res.scenarioBasePath}/${res.scenario.dir}`
-                const newDir = `${res.scenarioBasePath}/${res.newScheduleParam.saveDir}`
-
-                // page-diff
-                console.log("page-diff")
-                const oldFilePath = `${oldDir}/index.html`
-                const newFilePath = `${newDir}/index.html`
-                const outputPath  = `${newDir}/diff_${res.scenario.dir}.txt`
-                await dffr.diffFull(oldFilePath, newFilePath, outputPath)
-
-                // image-diff
-                console.log("image-diff")
-                const oldImageFilePath = `${oldDir}/screenshot.png`
-                const newImageFilePath = `${newDir}/screenshot.png`
-                const outputImagePath  = `${newDir}/diff_image_${res.scenario.dir}.png`
-                await dffr.diffImage(oldImageFilePath, newImageFilePath, outputImagePath)
-
-                // part-diff
-                console.log("part-diff")
-                await this.partialExtraction( to , res.scenario.actions )
-                .then( async r => {
-                    const oldFilePath = `${oldDir}/parts.html`
-                    const newFilePath = `${newDir}/parts.html`
-                    const outputPath  = `${newDir}/diff_parts_${res.scenario.dir}.txt`
-                    await dffr.diffFull (oldFilePath, newFilePath, outputPath)
-                })
-            } )
-            console.log("fs.renamed...".bgCyan)
-          } )
-          // console.log("fs.mkdirped...".bgCyan)
+          await this._diff(res)
           return res
         } )
         .then( async res => {
@@ -369,7 +390,7 @@ class Scraper {
           const dt = new Date();
           const scenarioData = {
               dir: this.save_dir_name,
-              date: dt.getFullYear() + ("00" + (dt.getMonth()+1)).slice(-2) + ("00" + dt.getDate() ).slice(-2),
+              // date: dt.getFullYear() + ("00" + (dt.getMonth()+1)).slice(-2) + ("00" + dt.getDate() ).slice(-2),
               execute: null
           }
 
@@ -385,7 +406,7 @@ class Scraper {
         } )
     }
 
-    async _immediatelyScrape (scenarioId) {
+    async _scrape (scenarioId) {
       const Scenario = require(`${process.cwd()}/application/scenario`)
       const scnr = new Scenario()
       const Scheduler = require(`${process.cwd()}/application/scheduler`)
