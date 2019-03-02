@@ -56,6 +56,11 @@ class Scraper {
         // console.log(target)
         target = src.split('/')
         target.shift() // httpなどのプロトコル部分を外す
+      } else if (src.match(/^\/\//)) {
+        // // にマッチする場合は、プロトコル略記なので、ドメイン部分から開始しているので // の / を飛ばす
+        target = src.split('/')
+        target.shift()
+        target.shift()
       } else if (src.match(/^\//)) {
         // / にマッチする場合は、base でなくホストを足す
         target = `${hostname}/${src}`.split('/')
@@ -69,7 +74,7 @@ class Scraper {
       filename = filename.split('?')[0]
       const outputPath = target.join('/')
         .replace(/:/g, '_') // ポート部分をアンダースコアに
-        .replace(/\./g, '_') // ドット文字もアンダースコアに
+        // .replace(/\./g, '_') // ドット文字もアンダースコアに
 
       return (`./${outputPath}/${filename}`).replace(/\/\/+/g, '/')
     }
@@ -164,8 +169,10 @@ class Scraper {
                 } else {
                   const dirs = parsedUrl.pathname.split('/')
                   const filename = (resExt === '') ? 'noname' : dirs.pop()
-                  const outputPath = parsedUrl.host.replace(/\./g, '_').replace(/:/g, '_') + // ドットとポート番号をアンダースコアに
-                                                  dirs.join('/')
+                  const outputPath = parsedUrl.host
+                                              // .replace(/\./g, '_')
+                                              .replace(/:/g, '_') + // ドットとポート番号をアンダースコアに
+                                              dirs.join('/')
                   const targetPath = (this.save_path + '/' + outputPath + '/').replace(/\/\/+/g, '/')
 
                   res.url()
@@ -277,6 +284,10 @@ class Scraper {
           if (src && !src.match(/^data:/)) {
             elem.attribs.src = this.replaceUrl(src, parsedUrl.hostname, parsedUrl.pathname)
           }
+          const srcset = elem.attribs.srcset
+          if (srcset && !srcset.match(/^data:/)) {
+            elem.attribs.srcset = this.replaceUrl(srcset, parsedUrl.hostname, parsedUrl.pathname)
+          }
         })
 
         $('link').each((i, elem) => {
@@ -306,29 +317,32 @@ class Scraper {
       }
     }
 
-    scheduledScrape (scenarioId) {
-      this._scrape(scenarioId)
-      .then( async res => {
-        console.log( "scheduled scraped.".bgCyan)
-        await this._diff(res)
-        return res
-      } )
-      .then( async res => {
-        // scenarioのdirを修正
-        // const dt = new Date();
-        const scenarioData = {
-            dir: this.save_dir_name,
-            // date: dt.getFullYear() + ("00" + (dt.getMonth()+1)).slice(-2) + ("00" + dt.getDate() ).slice(-2),
-            execute: null
-        }
+    async scheduledScrape (scenarioId) {
+      await this._scrape(scenarioId)
+        .then( async res => {
+          console.log( "scheduled scraped.".bgCyan)
+          await this._diff(res)
+          return res
+        } )
+        .then( async res => {
+          // scenarioのdirを修正
+          // const dt = new Date();
+          const scenarioData = {
+              dir: this.save_dir_name,
+              // date: dt.getFullYear() + ("00" + (dt.getMonth()+1)).slice(-2) + ("00" + dt.getDate() ).slice(-2),
+              execute: null
+          }
 
-        const Scenario = require( `${process.cwd()}/application/scenario` )
-        const scnr = new Scenario();
-        scnr.setRegisterParameter( scenarioData )
-        const updateScenarioResult = await scnr.updateScenario(scenarioId)
-        if (!updateScenarioResult) throw new Error(`scenario updating error`)
-        console.log( "updateScenarioResult".bgCyan, updateScenarioResult)
-      })
+          const Scenario = require( `${process.cwd()}/application/scenario` )
+          const scnr = new Scenario();
+          scnr.setRegisterParameter( scenarioData )
+          const updateScenarioResult = await scnr.updateScenario(scenarioId)
+          if (!updateScenarioResult) throw new Error(`scenario updating error`)
+          console.log( "updateScenarioResult".bgCyan, updateScenarioResult)
+        })
+        .catch( err => {
+          console.error(__filename, err)
+        } )
     }
 
     async _diff (res) {
