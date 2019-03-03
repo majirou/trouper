@@ -143,6 +143,24 @@ class Scheduler {
         })
       return this.result
     }
+
+    async updateNotified () {
+      const client = await this.mongo.connect(this.url, { useNewUrlParser: true })
+      const collection = await client.db(this.databaseName).collection(this.collectionName)
+      this.result = null
+
+      await collection.updateMany({notified: null}, {$set: { notified: new Date() } })
+        .then(res => {
+          console.log("NOTIFIED IS UPDATED".bgRed,res.result)
+          // if (res.result.ok !== 1) throw new Error('update is failed!!')
+          this.result = true
+        })
+        .catch(err => console.error(err))
+        .then( () => {
+          if (client) client.close()
+        })
+      return this.result
+    }
   }
 
   module.exports = Scheduler

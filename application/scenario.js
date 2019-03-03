@@ -22,7 +22,7 @@ class Scenario {
       let find = { $and: [ { delete: { $ne: true } } ] }
       if (param.multiSearch) {
         const regexp = new RegExp(param.multiSearch) //, 'g')
-        find.$or = [ { name: regexp }, { url: regexp } ]
+        find.$or = [ { name: regexp }, { url: regexp }, { mail: regexp }]
       }
       const lastPage = Math.ceil(await collection.find().count() / param.limit)
 
@@ -39,7 +39,7 @@ class Scenario {
         const regexp = new RegExp(param.multiSearch) //, 'g')
         const search = {
           '$match': {
-            '$or': [ { name: regexp }, { url: regexp } ]
+            '$or': [ { name: regexp }, { url: regexp }, { mail: regexp } ]
           }
         }
         aggregateParam.push(search)

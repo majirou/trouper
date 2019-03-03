@@ -103,7 +103,7 @@ class Routine {
             })
             .catch( err => {
                 if (err instanceof RangeError) {
-                    this.outputLabel('*',err.toString(),"bgYellow")
+                    this.outputLabel('*',err.toString(),"yellow")
                 } else {
                     this.outputLabel('*',err.toString(),"bgRed")
                     console.error(err)
@@ -123,7 +123,7 @@ class Routine {
                     {sort:{scheduled: 1},limit:100,skip:0}
                 )
                 .then( async res => {
-                    if( res.data == null || ! res.data.length > 0 ) throw new Error( `Error`)
+                    if( res.data == null || ! res.data.length > 0 ) throw new RangeError( `No targets Error`)
                     const toList = []
                     // console.log(res.data)
                     for( let v of res.data ) {
@@ -131,8 +131,8 @@ class Routine {
                     }
                     return toList
                 } )
-                .then( res => {
-                    if( res == null || ! res.length > 0 ) throw new Error( `Error`)
+                .then( async res => {
+                    if( res == null || ! res.length > 0 ) throw new RangeError( `No diffs Error`)
 
                     const countDiff = arr => {
                         let counter = 0
@@ -145,8 +145,8 @@ class Routine {
                     }
                     return res.filter( r => countDiff(r.diff) )
                 } )
-                .then( res => {
-                    if( res == null || ! res.length > 0 ) throw new Error( `Error`)
+                .then( async res => {
+                    if( res == null || ! res.length > 0 ) throw new RangeError( `No diff Error` )
 
                     const mailList = []
                     const getMessage = (n,d) => {
@@ -174,21 +174,65 @@ class Routine {
                     }
                     return mailList
                 } )
-                .then( res => {
+                .then( async res => {
                     if( res == null ) throw new Error( `Error`)
 
-                    for( let i in res ) {
-                        console.log(`${i} に対するメール`)
-                        res[i].forEach( r => {
-                            console.log(`${r.name} のクロール結果`)
-                            console.log(r.message.join("\n"))
-                        })
+                    // mailerによるメール送信
+                    const nodemailer = require('nodemailer');
+                    const transporter = nodemailer.createTransport({
+                      ssl: false,
+                      port : 25,
+                      use_authentication: false, // 認証しない
+                      tls: {
+                        rejectUnauthorized: false // do not fail on invalid certs
+                      }
+                    })
+
+                    const sendmail = async (subject,to,text,) => {
+                      const mailOptions = {
+                        to,
+                        subject,
+                        text,
+                        sender: 'Sender Name <sender-mail-addr>',
+                      }
+
+                      await transporter.sendMail( mailOptions , (error, result ) => {
+                        if(error){
+                          console.log("Error occured");
+                          console.log(error.message);
+                          return;
+                        }
+                        console.log( result );
+                      })
                     }
 
+                    let body = null
+                    for( let i in res ) {
+                        console.log(`${i} に対するメール`)
+                        body = []
+                        res[i].forEach( r => {
+                            if ( r.message != null && Array.isArray(r.message) ) {
+                                body.push(`「${r.name} 」のクロール結果`)
+                                body.push(`${baseUrl}/review/${r.id}`)
+                                body.push(r.message.join("\n"))
+                                body.push('\n')
+                            }
+                        })
+                        await sendmail('スクレイピング通知', i, body.join('\n'))
+                    }
                 })
+                .then( async res => {
+                    console.log("update notified timestamp")
+                    await scdl.updateNotified()
+                    console.log("updated notified timestamp")
+                } )
                 .catch( err => {
-                    this.outputLabel('*',err.toString(),"bgRed")
-                    console.error(err)
+                    if (err instanceof RangeError) {
+                        this.outputLabel('*',err.toString(),"yellow")
+                    } else {
+                        this.outputLabel('*',err.toString(),"bgRed")
+                        console.error(err)
+                    }
                 } )
         return result
     }
