@@ -207,15 +207,20 @@ app.get( '/api/schedules/:scenarioId/recent', async function (req, res) {
 } )
 
 // スケジュール取得
-app.get( '/api/schedule/:scenarioId/:id', function (req, res) {
-    try{
-        console.log( req.params.scenarioId, req.params.id)
-    } catch( err ) {
-        console.log( "error" , err);
-    } finally{
-        // 結果を返答
-        res.send("end")
-    }
+app.get( '/api/schedule/:scenarioId/:id', async function (req, res) {
+    // console.log( req.params.scenarioId, req.params.id)
+    const Scheduler = require( './application/scheduler' )
+    const scdl = new Scheduler()
+    scdl.setSearchParameter( {scenarioId: req.params.scenarioId, _id: req.params.id } )
+    const result = await scdl.getSchedules(  { skip:0, limit: 1, sort: {done: -1} } )
+                             .then( result => {
+                                // console.log(result)
+                                return res.json( result.data )
+                             })
+                             .catch( err => {
+                                console.error( "error" , err);
+                                res.sendStatus(400).send("BadRequest")
+                             })
 } )
 
 // 履歴スケジュール取得
@@ -252,63 +257,64 @@ app.post( '/api/schedule/now', async function (req, res) {
 
 app.get( '/api/scrapper/status', function( req, res ) {
     console.log( req.query )
-} )
+})
 
 app.get( '/api/review' , async function( req, res ) {
     console.log( "review get",req.body,req.query)
     res.send("hoge")
-} )
+})
 
 app.get( '/api/diff' , async function( req, res ) {
-    const id = req.query.id
-    const after = req.query.after
-    const before = req.query.before
+    const scenarioId = req.query.id
+    const newId = req.query.after
+    const oldId = req.query.before
     const type = req.query.type
 
     const Differ = require('./application/differ' ) ;
     const dffr = new Differ();
-
-    await dffr.getDiffFile(id, before, after, type)
-              .then( response => {
+    await dffr.getDiffFile(scenarioId, oldId, newId, type)
+              .then(response => {
                 res.send(response)
               })
-              .catch( err => {
+              .catch(err => {
                 console.error(__filename, err)
                 if( err.code === 'ENOENT'){
                     res.status(404).send("Not Found")
                 }else{
                     res.status(400).send("Bad Request")
                 }
-              } )
-} )
+              })
+})
 
 app.post( '/api/diff' , async function( req, res ) {
-    const id = req.body.scenarioId
-    const after = req.body.after
-    const before = req.body.before
+    const scenarioId = req.body.scenarioId
+    const newId = req.body.newId
+    const oldId = req.body.oldId
 
     const Differ = require('./application/differ' ) ;
     const dffr = new Differ();
 
-    // 5.1.1 フルテキスト差分
-    const scenarioBasePath = `${process.cwd()}/public_html/data/scenario/${id}`
+    const scenarioBasePath = `${process.cwd()}/public_html/data/scenario/${scenarioId}`
+    const newDir = `${scenarioBasePath}/${newId}`
+    const oldDir = `${scenarioBasePath}/${oldId}`
+    // フルテキスト差分
+    const diffedFilePath = `${oldDir}/index.html`
+    const differFilePath = `${newDir}/index.html`
+    const outputPath     = `${newDir}/diff_${oldId}.txt`
+    // パーツテキスト差分
+    const diffedPartsFilePath = `${oldDir}/parts.html`
+    const differPartsFilePath = `${newDir}/parts.html`
+    const outputPartsPath     = `${newDir}/diff_parts_${oldId}.txt`
+    // 画像差分
+    const oldImageFilePath = `${oldDir}/screenshot.png`
+    const newImageFilePath = `${newDir}/screenshot.png`
+    const outputImagePath  = `${newDir}/diff_image_${oldId}.png`
 
-    const diffedFilePath = `${scenarioBasePath}/${before}/index.html`
-    const differFilePath = `${scenarioBasePath}/${after}/index.html`
-    const outputPath = `${scenarioBasePath}/${after}/diff_${before}.txt`
-    await dffr.diffFull(diffedFilePath, differFilePath, outputPath)
-              .then( response => {
-                console.log("response",response)
-                res.status(200).send(response)
-              })
-              .catch( err => {
-                console.error(__filename, err)
-                if( err.code === 'ENOENT'){
-                    res.status(404).send("Not Found")
-                }else{
-                    res.status(400).send("Bad Request")
-                }
-              } )
+    const resultPage = await dffr.diffFull(diffedFilePath, differFilePath, outputPath)
+    const resultParts = await dffr.diffFull(diffedPartsFilePath, differPartsFilePath, outputPartsPath)
+    const resultImage = await dffr.diffImage(oldImageFilePath, newImageFilePath, outputImagePath)
+
+    res.status(200).json({ resultPage, resultParts, resultImage})
 } )
 
 // if direct access review page, redirect index.html and router push it

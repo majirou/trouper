@@ -64,7 +64,7 @@ export default {
       currIframeId: null // createIframeId('curr', currTarget)
     }
   },
-  props: ['currTarget', 'prevTarget', 'fileName', 'currTimestamp', 'prevTimestamp'],
+  props: ['currTarget', 'prevTarget', 'fileName', 'currTimestamp', 'prevTimestamp', 'triggerDiff'],
   methods: {
     getDiffHtml: function () {
       const type = (this.fileName === 'index.html') ? 1 : 2
@@ -142,6 +142,9 @@ export default {
           e.target.body.scrollTop
         )
       })
+      const style = document.createElement('style')
+      style.innerText = 'html{pointer-events: none;}'
+      event.target.contentWindow.document.head.appendChild(style)
     },
     createIframeId (prefix, target) {
       return (target != null && target.saveDir) ? `${prefix}${target.saveDir}` + this.fileName.split('.')[0] : null
@@ -184,6 +187,13 @@ export default {
     },
     enableDiff: function () {
       if (this.enableDiff) this.getDiffHtml()
+    },
+    triggerDiff () {
+      // console.log('triggerDiff', this.triggerDiff)
+      if (this.triggerDiff) {
+        this.getDiffHtml()
+        this.$emit('ignite')
+      }
     }
   }
 }
@@ -197,7 +207,7 @@ export default {
   background-color: #b4e2b4;
 }
 .diff-panel{
-  overflow: scroll;
+  // overflow: scroll;
   display: flex;
   flex-direction: column;
   .adjuster{
@@ -226,7 +236,7 @@ export default {
 
 <style lang="scss">
 .d2h-files-diff{
-  overflow: scroll;
+  overflow: auto;
   height: 12em;
 }
 .d2h-file-list-wrapper{

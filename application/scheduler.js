@@ -113,6 +113,10 @@ class Scheduler {
 
       const ObjectId = require('mongodb').ObjectID
 
+      // Id
+      if(typeof param._id !== 'undefined') {
+        this.param._id = (param._id) ? ObjectId(param._id.trim()):null
+      }
       // scenarioId
       if(typeof param.scenarioId !== 'undefined') {
         this.param.scenarioId = (param.scenarioId)?ObjectId(param.scenarioId.trim()):null

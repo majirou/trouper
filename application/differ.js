@@ -36,15 +36,16 @@ class Differ {
             console.log(`DIFF FILE: ${output} is outputed`.bgGreen)
           }
         })
+        return true
       }
 
       if (!await this.checkExist(_before)) {
         console.error(`BEFORE: ${_before} is not exist`)
-        return 0
+        return false
       }
       if (!await this.checkExist(_after)) {
         console.error(`AFTER: ${_after} is not exist`)
-        return 0
+        return false
       }
 
       await execDiff(_before, _after, _output)
@@ -86,14 +87,14 @@ class Differ {
 
       if (!await this.checkExist(_before)) {
         console.error(`BEFORE: ${_before} is not exist`)
-        return 0
+        return false
       }
       if (!await this.checkExist(_after)) {
         console.error(`AFTER: ${_after} is not exist`)
-        return 0
+        return false
       }
       await execDiff(_before, _after, _output)
-      return 1
+      return true
     }
 
     async getDiffFile (id, before, after, type) {

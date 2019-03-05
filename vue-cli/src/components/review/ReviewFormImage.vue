@@ -1,26 +1,27 @@
 <template lang="pug">
   section.diff-panel.p-2.border.border-gray.border-top-0
-    div.d-flex(style="overflow: scroll")
-      div.w-100.mr-1(:class="{'d-none':isMaximum(2)}")
-        div.d-flex.mb-1
+    .d-flex
+      .w-100.mr-1(:class="{'d-none':isMaximum(2)}")
+        .d-flex.mb-1
           i.far.fa-window-minimize.fa-fw.mr-1(@click="maximizeImage()")
           i.far.fa-window-maximize.fa-fw(@click="maximizeImage(1)" :class="{disable: isMaximum(1)}")
           i.far.fa-clone.fa-fw(@click="toggleFilter(1)")
-          div.ml-auto.mr-0
+          .ml-auto.mr-0
             span.old.rounded.px-2 {{prevTimestamp}}
-        div(style="position:relative")
-          img.w-100.border(:src="prevImageSource")
-          img.w-100.border(:src="diffImageSource" style="position:absolute;left:0;opacity:.75" :class="{'d-none':!isFiltered(1)}")
-      div.w-100.mr-1(:class="{'d-none':isMaximum(1)}")
-        div.d-flex.mb-1
+      .w-100.mr-1(:class="{'d-none':isMaximum(1)}")
+        .d-flex.mb-1
           i.far.fa-window-minimize.fa-fw.mr-1(@click="maximizeImage()")
           i.far.fa-window-maximize.fa-fw(@click="maximizeImage(2)" :class="{disable: isMaximum(2)}")
           i.far.fa-clone.fa-fw(@click="toggleFilter(2)")
-          div.ml-auto.mr-0
+          .ml-auto.mr-0
             span.new.rounded.px-2 {{currTimestamp}}
-        div(style="position:relative")
-          img.w-100.border(:src="currImageSource")
-          img.w-100.border(:src="diffImageSource" style="position:absolute;left:0;opacity:.75" :class="{'d-none':!isFiltered(2)}")
+    .d-flex(style="overflow: scroll;margin-top: 1.25em;")
+      div(style="position:relative" :class="{'d-none':isMaximum(2)}")
+        img.w-100.border(:src="prevImageSource")
+        img.w-100.border(:src="diffImageSource" style="position:absolute;left:0;opacity:.75" :class="{'d-none':!isFiltered(1)}")
+      div(style="position:relative" :class="{'d-none':isMaximum(1)}")
+        img.w-100.border(:src="currImageSource")
+        img.w-100.border(:src="diffImageSource" style="position:absolute;left:0;opacity:.75" :class="{'d-none':!isFiltered(2)}")
 </template>
 
 <script>
@@ -37,7 +38,7 @@ export default {
       activeFilter: 0
     }
   },
-  props: ['currTarget', 'prevTarget', 'fileName', 'currTimestamp', 'prevTimestamp'],
+  props: ['currTarget', 'prevTarget', 'fileName', 'currTimestamp', 'prevTimestamp', 'triggerDiff'],
   methods: {
     maximizeImage: function (num) {
       this.activeImagePanel = num || 0
@@ -77,6 +78,15 @@ export default {
                                `${this.currTarget.scenarioId}/` +
                                `${this.currTarget.saveDir}/` +
                                `diff_image_${this.prevTarget.saveDir}.png`
+      }
+    },
+    triggerDiff () {
+      if (this.triggerDiff) {
+        this.diffImageSource = `${this.$dataUrl}/scenario/` +
+                               `${this.currTarget.scenarioId}/` +
+                               `${this.currTarget.saveDir}/` +
+                               `diff_image_${this.prevTarget.saveDir}.png`
+        this.$emit('ignite')
       }
     }
   }
@@ -121,7 +131,7 @@ export default {
   }
 }
 .diff-panel{
-  overflow: scroll;
+  // overflow: scroll;
   display: flex;
   flex-direction: column;
   .adjuster{

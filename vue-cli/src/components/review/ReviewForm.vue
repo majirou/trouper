@@ -2,19 +2,19 @@
   div.container-fluid
     ul.nav.nav-tabs
       li.nav-item
-        input#tab-page( type="radio" value="1" v-model="tabId")
+        input#tab-page( type="radio" value="1" v-model="activeTabId")
         label.nav-link( :class="{active: isActiveTab(1)}" for="tab-page") ページ
       li.nav-item
-        input#tab-part( type="radio" value="2" v-model="tabId")
+        input#tab-part( type="radio" value="2" v-model="activeTabId")
         label.nav-link( :class="{active: isActiveTab(2)}" for="tab-part") 部分
       li.nav-item
-        input#tab-image( type="radio" value="3" v-model="tabId")
+        input#tab-image( type="radio" value="3" v-model="activeTabId")
         label.nav-link( :class="{active: isActiveTab(3)}" for="tab-image") 画像
       li.nav-item
-        input#tab-history( type="radio" value="4" v-model="tabId")
+        input#tab-history( type="radio" value="4" v-model="activeTabId")
         label.nav-link( :class="{active: isActiveTab(4)}" for="tab-history") 履歴
       li.nav-item.ml-auto.mr-0
-        input#tab-edit( type="radio" value="5" v-model="tabId")
+        input#tab-edit( type="radio" value="5" v-model="activeTabId")
         label.nav-link( :class="{active: isActiveTab(5)}" for="tab-edit") {{scenarioName}}
     PageDiffPanel(
       v-show="isActiveTab(1)"
@@ -24,6 +24,8 @@
       :currTimestamp="targetTimestamp"
       :prevTimestamp="previousTimestamp"
       :fileName="pageDiffFileName"
+      :triggerDiff="triggerPageDiff"
+      @ignite="triggerPageDiff=false"
     )
     // テキスト部分差分
     PartDiffPanel(
@@ -34,6 +36,8 @@
       :currTimestamp="targetTimestamp"
       :prevTimestamp="previousTimestamp"
       :fileName="partDiffFileName"
+      :triggerDiff="triggerPartDiff"
+      @ignite="triggerPartDiff=false"
     )
     // 画像差分
     DiffImage(
@@ -44,6 +48,8 @@
       :currTimestamp="targetTimestamp"
       :prevTimestamp="previousTimestamp"
       :fileName="imageDiffFileName"
+      :triggerDiff="triggerImageDiff"
+      @ignite="triggerImageDiff=false"
     )
     History(
       v-show="isActiveTab(4)"
@@ -53,6 +59,7 @@
       :prevTarget="previousSchedule"
       :currTimestamp="targetTimestamp"
       :prevTimestamp="previousTimestamp"
+      @compare="compareHistory"
     )
     ScenarioEdit.p-2.border.border-gray.border-top-0(
       v-show="isActiveTab(5)"
@@ -63,7 +70,7 @@
       div(slot="header")
         i.fas.fa-question-circle.mr-2
         | 再差分生成確認
-      div(slot="body" v-html="this.getDialogMessage()")
+      div(slot="body") 差分ファイルが見つからなかったので、再作成しますか？
       span(slot="ok")
         i.fas.fa-check-circle.mr-2
         | OK
@@ -106,7 +113,7 @@ export default {
   },
   data () {
     return {
-      tabId: 1,
+      activeTabId: 1,
       targetSchedule: null,
       previousSchedule: null,
       errors: [],
@@ -117,25 +124,23 @@ export default {
       partDiffFileName: 'parts.html',
       imageDiffFileName: 'screenshot.png',
       targetTimestamp: null,
-      previousTimestamp: null
+      previousTimestamp: null,
+      triggerPageDiff: false,
+      triggerPartDiff: false,
+      triggerImageDiff: false
     }
   },
   props: ['scenarioId', 'newId', 'oldId', 'panelHeight'],
   methods: {
     isActiveTab: function (id) {
-      return (parseInt(this.tabId) === id)
+      return (parseInt(this.activeTabId) === id)
     },
     getRecentlySchedule: function (id) {
       const targetUrl = `${this.$apiUrl}/schedules/${id}/recent`
       axios.get(targetUrl)
         .then(res => {
-          console.log(res)
-          if (res.status !== 200) {
-            throw new Error('正しいデータを取得できませんでした')
-          }
-          if (res.data.length === 1) {
-            throw new Error('スクレイピング結果が１件しかありません。')
-          }
+          if (res.status !== 200) throw new Error('正しいデータを取得できませんでした')
+          if (res.data.length === 1) throw new Error('スクレイピング結果が１件しかありません。')
           return res.data
         })
         .then(data => {
@@ -166,25 +171,25 @@ export default {
           .catch(err => console.error(err))
       }
     },
-    getSchedule: function (id) {
-      const targetUrl = `${this.$apiUrl}/schedule/${this.scenarioId}/${id}`
-      axios.get(targetUrl)
-        .then(res => {
-          console.log(res)
-          if (res.status === 200) {
-            return res.data
-          } else {
-            // this.registeringErrors = res.data.error
-            throw new Error('error')
-          }
-        })
-        .then((data) => {
-          console.log(data)
-        })
-        .catch((err) => {
-          // handle error
-          console.log(err)
-        })
+    getSchedule: async function (id) {
+      if (id != null) {
+        const targetUrl = `${this.$apiUrl}/schedule/${this.scenarioId}/${id}`
+        var result = null
+        await axios.get(targetUrl)
+          .then(res => {
+            // console.log(res)
+            if (res.status !== 200 || res.data.length !== 1) throw new Error('error')
+            return res.data.pop()
+          })
+          .then((data) => {
+            result = data
+          })
+          .catch((err) => {
+            // handle error
+            console.log(err)
+          })
+        return result
+      }
     },
     getDialogMessage: function () {
       return `差分ファイルが見つからなかったので、再作成しますか？`
@@ -195,8 +200,8 @@ export default {
       this.$lock('再差分作成中...')
       const ret = {
         scenarioId: this.scenarioId,
-        before: this.previousSchedule.saveDir,
-        after: this.targetSchedule.saveDir
+        oldId: this.previousSchedule.saveDir,
+        newId: this.targetSchedule.saveDir
       }
       const url = `${this.$apiUrl}/diff`
       axios
@@ -206,7 +211,10 @@ export default {
           this.showDialog = false
         })
         .catch(err => console.error(err))
-        .then(() => this.$unlock())
+        .then(() => {
+          var _self = this
+          setTimeout(function () { _self.$unlock() }, 2000)
+        })
     },
     formatDatetime: function (str) {
       // 2019,01,14,07,20,57
@@ -227,6 +235,24 @@ export default {
       } else {
         location.href = url
       }
+    },
+    async compareHistory (newId, oldId) {
+      console.log(newId, oldId)
+
+      await this.getSchedule(newId)
+        .then(res => {
+          this.targetSchedule = res
+          this.targetTimestamp = this.formatDatetime(res.saveDir)
+        })
+      await this.getSchedule(oldId)
+        .then(res => {
+          this.previousSchedule = res
+          this.previousTimestamp = this.formatDatetime(res.saveDir)
+        })
+      await this.doDiff()
+      this.triggerPageDiff = true
+      this.triggerPartDiff = true
+      this.triggerImageDiff = true
     }
   },
   watch: {
