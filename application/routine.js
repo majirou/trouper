@@ -152,16 +152,16 @@ class Routine {
                     const getMessage = (n,d) => {
                         const bin = n.reduce( (p,c) => p+c );
                         const msg = []
-                        if( bin & 1 === 1 && d.page ) {
+                        if( ( ( bin & 1 ) === 1) && d.page ) {
                             msg.push("ページ差分あり")
                         }
-                        if( bin & 2 === 2 && d.part ) {
+                        if( ( ( bin & 2 ) === 2 ) && d.part ) {
                             msg.push("ページ部分差分あり")
                         }
-                        if( bin & 4 === 4 && d.image ) {
+                        if( ( ( bin & 4 ) === 4 ) && d.image ) {
                             msg.push("画像差分あり")
                         }
-                        return (msg.length>0) ? msg : null
+                        return (msg.length > 0) ? msg : null
                     }
                     for( let v of res ){
                         if( mailList[v.mail] == null ) mailList[v.mail] = []
@@ -218,7 +218,9 @@ class Routine {
                                 body.push('\n')
                             }
                         })
-                        await sendmail('スクレイピング通知', i, body.join('\n'))
+                        if( body != null && body.length > 0 ){
+                            await sendmail('スクレイピング通知', i, body.join('\n'))
+                        }
                     }
                 })
                 .then( async res => {
