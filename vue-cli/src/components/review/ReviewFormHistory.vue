@@ -6,17 +6,14 @@
         tr
           th スケジュールID
           th 実施日時
-          th.old {{prevTarget._id}}
-          th.new {{currTarget._id}}
+          th.old {{getPrevId}}
+          th.new {{getcurrId}}
           th.text-center 無効化
-      tbody
+      tbody(v-if="historyList.length > 0" )
         tr(v-for="(v,i) in historyList" :key="i")
           td {{v._id}}
           td
-            //- なぜか下記のやり方でないとうまくいかなかったので…（本当は:class=で実行したかった
-            span.old(v-if="prevTarget._id === v._id") {{formatTimestamp(v.saveDir)}}
-            span.new(v-else-if="currTarget._id === v._id") {{formatTimestamp(v.saveDir)}}
-            span(v-else) {{formatTimestamp(v.saveDir)}}
+            span(:class="getCellClass(v._id)") {{formatTimestamp(v.saveDir)}}
           td.old
             label
               input(
@@ -36,9 +33,34 @@
               )
               div
           td.text-center(style="position: relative;top: -2px;")
-            button.btn.btn-sm.btn-danger.py-0(@click="voidSchedule" :value="v._id") 無効化
+            button.btn.btn-sm.btn-danger.py-0(@click="openVoidDialog" :value="v._id") 無効化
+            span {{v.voided}}
     .text-right
       button.btn.btn-primary(@click="createCompare()") 比較する
+    VoidDialog(:showDialog="showVoidDialog")
+      div(slot="header")
+        i.fas.fa-question-circle.mr-2
+        | 無効化
+      div(slot="body") このスケジュール結果を無効化しますか？
+      div(slot="footer")
+        div.d-flex
+          button.btn.btn-secondary(@click="closeVoidDialog")
+            | キャンセル
+          button.btn.btn-danger.mr-0.ml-auto(@click="doVoid")
+            i.fas.fa-ban.mr-2
+            | 無効化
+    ErrorDialog(:showDialog="showErrorDialog")
+      div(slot="header")
+        i.fas.fa-exclamation-triangle.mr-2
+        | エラー
+      div(slot="body")
+        ul
+          li(v-for="(v,i) in errors" :key="i") {{v}}
+      div(slot="footer")
+        div.d-flex
+          button.btn.btn-primary.mr-0.ml-auto(@click="closeErrorDialog")
+            i.fas.fa-check-circle.mr-2
+            | OK
 </template>
 
 <script>
@@ -48,14 +70,18 @@ var axios = require('axios')
 export default {
   name: 'ReviewHistory',
   components: {
-    'ErrorDialog': CommonDialog
+    'ErrorDialog': CommonDialog,
+    'VoidDialog': CommonDialog
   },
   data () {
     return {
       historyList: [],
       selected: null,
       oldTarget: null,
-      newTarget: null
+      newTarget: null,
+      showVoidDialog: false,
+      showErrorDialog: false,
+      errors: []
     }
   },
   props: ['scenarioId', 'currTarget', 'prevTarget', 'fileName', 'currTimestamp', 'prevTimestamp'],
@@ -79,15 +105,70 @@ export default {
           }
         })
     },
-    voidSchedule (event) {
-      console.log(event, event.currentTarget.value)
-    },
     formatTimestamp (dir) {
       return `${dir.substr(0, 4)}/${dir.substr(4, 2)}/${dir.substr(6, 2)} ${dir.substr(8, 2)}:${dir.substr(10, 2)}:${dir.substr(12, 2)}`
     },
     createCompare () {
       this.$emit('compare', this.newTarget, this.oldTarget)
+    },
+    openVoidDialog (event) {
+      this.voidTarget = event.currentTarget.value
+      this.showVoidDialog = true
+    },
+    closeVoidDialog () {
+      this.voidTarget = null
+      this.showVoidDialog = false
+    },
+    openErrorDialog () {
+      this.showErrorDialog = true
+    },
+    closeErrorDialog () {
+      this.errors = []
+      this.showErrorDialog = false
+    },
+    doVoid () {
+      console.log(this.voidTarget)
+      const scheduleId = this.voidTarget
+      const targetUrl = `${this.$apiUrl}/schedule/void/${scheduleId}`
+
+      axios.put(targetUrl)
+        .then(res => {
+          if (res.status !== 200) throw new Error('error')
+          return res.data
+        })
+        .then(data => {
+          this.closeVoidDialog()
+          this.$lock('無効化中...')
+          this.getHistory()
+        })
+        .catch(err => {
+          if (err.response.status === 404) {
+            this.errors.push(err.response.config.url + ' is not found')
+            this.showErrorDialog = true
+          } else {
+            console.error(err)
+            this.errors.push(err.response.config.url)
+            this.showErrorDialog = true
+          }
+        })
+        .then(() => {
+          var _self = this
+          setTimeout(function () { _self.$unlock() }, 1000)
+        })
+    },
+    getCellClass (id) {
+      let rt = ''
+      if (this.prevTarget._id === id) {
+        rt = 'old'
+      } else if (this.currTarget._id === id) {
+        rt = 'new'
+      }
+      return rt
     }
+  },
+  computed: {
+    getPrevId () { return this.prevTarget ? this.prevTarget._id : null },
+    getcurrId () { return this.currTarget ? this.currTarget._id : null }
   },
   watch: {
     scenarioId () { this.getHistory() },
@@ -149,5 +230,10 @@ export default {
   vertical-align: unset;
   margin: 0;
   padding: 0;
+}
+
+.table th ,
+.table td {
+  word-break: break-all
 }
 </style>

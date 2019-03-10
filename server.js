@@ -115,7 +115,11 @@ app.post( '/api/scenario' , async function( req, res ) {
             const Scheduler = require( './application/scheduler' )
             const scdl = new Scheduler();
             // 予定日は現日付を採用
-            const scheduleParam = { scenarioId: resultScenarioId , scheduled: new Date() }
+            const scheduleParam = {
+                scenarioId: resultScenarioId,
+                scheduled: new Date(),
+                created: new Date()
+            }
             scdl.setRegisterParameter( scheduleParam ) // `${y}-${m}-${d}` }  )
             const addResultScheduleId = await scdl.addSchedule()
             console.log('addResult', addResultScheduleId)
@@ -197,7 +201,7 @@ app.get( '/api/schedules/:scenarioId/recent', async function (req, res) {
         const Scheduler = require( './application/scheduler' )
         const scdl = new Scheduler()
         // console.log( "scenario id =",req.params.scenarioId)
-        scdl.setSearchParameter( {scenarioId: req.params.scenarioId} )
+        scdl.setSearchParameter( {scenarioId: req.params.scenarioId, voided: {$eq: null} } )
         const result = await scdl.getSchedules( { skip:0, limit: 2, sort: {done: -1} } )
         res.json( result.data )
     } catch( err ) {
@@ -225,13 +229,13 @@ app.get( '/api/schedule/:scenarioId/:id', async function (req, res) {
 
 // 履歴スケジュール取得
 app.get( '/api/history/:scenarioId', async function (req, res) {
-    try{
+    try {
         const Scheduler = require( './application/scheduler' )
         const scdl = new Scheduler()
-        scdl.setSearchParameter( {scenarioId: req.params.scenarioId} )
-        const result = await scdl.getSchedules(  { skip:0, limit: 100, sort: {done: -1} } )
-        res.json( result.data )
-    } catch( err ) {
+        scdl.setSearchParameter({ scenarioId: req.params.scenarioId })
+        const result = await scdl.getSchedules({ skip:0, limit: 100, sort: {done: -1} })
+        res.json(result.data)
+    } catch (err) {
         console.log( "error" , err);
         res.sendStatus(400).send("BadRequest")
     }
@@ -253,7 +257,27 @@ app.post( '/api/schedule/now', async function (req, res) {
         // 結果を返答
         res.send("end")
     }
-} )
+})
+
+// スケジュール無効化更新
+app.put( '/api/schedule/void/:scheduleId', async function (req, res) {
+  console.log('test', req.params.scheduleId )
+  const scheduleId = req.params.scheduleId
+
+  if (scheduleId != null) {
+    const Scheduler = require('./application/scheduler')
+    const scdl = new Scheduler()
+    // 予定日は現日付を採用
+    const scheduleParam = { voided: new Date() }
+    scdl.setRegisterParameter(scheduleParam)
+    const result = await scdl.updateSchedule(scheduleId)
+    console.log(result);
+    // res.json( result )
+    res.json({ a: 1} )
+  } else {
+      res.status(400).send("Bad Request")
+  }
+})
 
 app.get( '/api/scrapper/status', function( req, res ) {
     console.log( req.query )

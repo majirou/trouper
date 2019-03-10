@@ -53,20 +53,40 @@ class Scheduler {
 
       const ObjectId = require('mongodb').ObjectID
       // created
-      this.param.created = new Date()
+      if(typeof param.created !== 'undefined') {
+        this.param.created = new Date()
+      }
       // scheduled
-      this.param.scheduled = setDate(param.scheduled)
+      if(typeof param.scheduled !== 'undefined') {
+        this.param.scheduled = setDate(param.scheduled)
+      }
       // executed
-      this.param.executed = setDate(param.executed)
+      if(typeof param.executed !== 'undefined') {
+        this.param.executed = setDate(param.executed)
+      }
       // done
-      this.param.done = setDate(param.done)
+      if(typeof param.done !== 'undefined') {
+        this.param.done = setDate(param.done)
+      }
       // notified
-      this.param.notified = setDate(param.notified)
+      if(typeof param.notified !== 'undefined') {
+        this.param.notified = setDate(param.notified)
+      }
+      // voided
+      if(typeof param.voided !== 'undefined') {
+        this.param.voided = setDate(param.voided)
+      }
       // scenarioId
       // console.log( param.scenarioId, typeof param.scenarioId, param.scenarioId.toString() )
-      this.param.scenarioId = (param.scenarioId) ? ObjectId(param.scenarioId.toString().trim()) : null
+      if(typeof param.scenarioId !== 'undefined') {
+        // this.param.scenarioId = (param.scenarioId) ? ObjectId(param.scenarioId.toString().trim()) : null
+        this.param.scenarioId = ObjectId(param.scenarioId.toString().trim())
+      }
       // saveDir
-      this.param.saveDir = (param.saveDir) ? param.saveDir.trim() : null
+      if(typeof param.saveDir !== 'undefined') {
+        // this.param.saveDir = (param.saveDir) ? param.saveDir.trim() : null
+        this.param.saveDir = param.saveDir.trim()
+      }
     }
 
     async updateSchedule (id) {
@@ -95,7 +115,8 @@ class Scheduler {
     async getSchedules (param) {
       const client = await this.mongo.connect(this.url, { useNewUrlParser: true })
       const collection = await client.db(this.databaseName).collection(this.collectionName)
-
+      // console.log("getSchedules", this.param)
+      this.param.voided = {$eq: null}
       const lastPage = Math.ceil(await collection.find().count() / param.limit)
       const data = await collection.find(this.param)
         .sort(param.sort)
