@@ -66,7 +66,7 @@
       :style="{height: panelHeight}"
       :scenarioId="scenarioId"
     )
-    RedoDiffDialog(:showDialog="showDialog" @cancel="closeDialog" @ok="doDiff")
+    DiffDialog(:showDialog="showDiffDialog" @cancel="closeDiffDialog" @ok="doDiff")
       div(slot="header")
         i.fas.fa-question-circle.mr-2
         | 再差分生成確認
@@ -103,7 +103,7 @@ var axios = require('axios')
 export default {
   name: 'ReviewForm',
   components: {
-    'RedoDiffDialog': CommonDialog,
+    'DiffDialog': CommonDialog,
     'ErrorDialog': CommonDialog,
     'PageDiffPanel': DiffPanel,
     'PartDiffPanel': DiffPanel,
@@ -117,7 +117,7 @@ export default {
       targetSchedule: null,
       previousSchedule: null,
       errors: [],
-      showDialog: false,
+      showDiffDialog: false,
       showErrorDialog: false,
       scenarioName: null,
       pageDiffFileName: 'index.html',
@@ -194,7 +194,9 @@ export default {
     getDialogMessage: function () {
       return `差分ファイルが見つからなかったので、再作成しますか？`
     },
-    closeDialog: function () { this.showDialog = false },
+    openDiffDialog: function () { this.showDiffDialog = true },
+    closeDiffDialog: function () { this.showDiffDialog = false },
+    openErrorDialog: function () { this.showErrorDialog = true },
     closeErrorDialog: function () { this.showErrorDialog = false },
     doDiff: function (event) {
       this.$lock('再差分作成中...')
@@ -208,7 +210,7 @@ export default {
         .post(url, ret)
         .then(res => {
           if (res.status !== 200) throw new Error('error')
-          this.showDialog = false
+          this.showDiffDialog = false
         })
         .catch(err => console.error(err))
         .then(() => {

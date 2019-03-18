@@ -7,6 +7,7 @@
           i.far.fa-window-maximize.fa-fw(@click="maximizeImage(1)" :class="{disable: isMaximum(1)}")
           i.far.fa-clone.fa-fw(@click="toggleFilter(1)")
           .ml-auto.mr-0
+            i.fas.fa-sync-alt.fa-fw(@click="checkSource")
             span.old.rounded.px-2 {{prevTimestamp}}
       .w-100.mr-1(:class="{'d-none':isMaximum(1)}")
         .d-flex.mb-1
@@ -14,6 +15,7 @@
           i.far.fa-window-maximize.fa-fw(@click="maximizeImage(2)" :class="{disable: isMaximum(2)}")
           i.far.fa-clone.fa-fw(@click="toggleFilter(2)")
           .ml-auto.mr-0
+            i.fas.fa-sync-alt.fa-fw(@click="checkSource")
             span.new.rounded.px-2 {{currTimestamp}}
     .d-flex(style="overflow: scroll;margin-top: 1.25em;")
       div(style="position:relative" :class="{'d-none':isMaximum(2)}")
@@ -52,6 +54,20 @@ export default {
     },
     isFiltered: function (num) {
       return (this.activeFilter & num) === num
+    },
+    checkSource (event) {
+      var now = new Date()
+      var y = now.getFullYear()
+      var m = ('00' + (now.getMonth() + 1)).slice(-2)
+      var d = ('00' + now.getDate()).slice(-2)
+      var h = ('00' + now.getHours()).slice(-2)
+      var i = ('00' + now.getMinutes()).slice(-2)
+      var s = ('00' + now.getSeconds()).slice(-2)
+
+      this.diffImageSource = `${this.$dataUrl}/scenario/` +
+                              `${this.currTarget.scenarioId}/` +
+                              `${this.currTarget.saveDir}/` +
+                              `diff_image_${this.prevTarget.saveDir}.png?v=${y}${m}${d}${h}${i}${s}`
     }
   },
   computed: {
