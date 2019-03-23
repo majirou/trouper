@@ -238,6 +238,48 @@ class Routine {
                 } )
         return result
     }
+
+    async sweepScenarios () {
+        // シナリオで削除(delete=true)となっている対象をひろいます。
+        const scenariosResult = await this.scnr.getScenarios({delete: true})
+        if( scenariosResult.data.length > 0 ) {
+            const fs = require('fs-extra')
+            const scenarioDir = process.cwd() + '/public_html/data/scenario'
+            for ( let s of scenariosResult.data ) {
+                console.log(`REMOVING SCENARIO: ${scenarioDir}/${s._id}`.bgRed)
+                fs.remove( `${scenarioDir}/${s._id}`, err => {
+                    if ( err != null) {
+                        console.error( err )
+                    } else {
+                        this.scnr.physicalDeleteScenario(s._id)
+                    }
+                })
+            }
+        }
+    }
+
+    async sweepSchedules () {
+        // スケジュールで無効化になっているものを対象にし、削除
+        const Scheduler = require('./scheduler' ) ;
+        const scdl = new Scheduler();
+
+        scdl.setSearchParameter({ voided: { $ne: null } })
+        const scheduleResult = await scdl.getSchedules()
+        if( scheduleResult.data.length > 0 ) {
+            const fs = require('fs-extra')
+            const scheduleDir = process.cwd() + '/public_html/data/scenario'
+            for ( let s of scheduleResult.data ) {
+                console.log(`REMOVING SCHEDULE: ${scheduleDir}/${s.scenarioId}/${s.saveDir}`.bgRed)
+                fs.remove( `${scheduleDir}/${s.scenarioId}/${s.saveDir}`, err => {
+                    if ( err != null) {
+                        console.error( err )
+                    } else {
+                        scdl.physicalDeleteSchedule(s._id)
+                    }
+                })
+            }
+        }
+    }
 }
 
 module.exports = Routine

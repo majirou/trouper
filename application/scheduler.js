@@ -113,16 +113,27 @@ class Scheduler {
     }
 
     async getSchedules (param) {
+      param = param || {}
       const client = await this.mongo.connect(this.url, { useNewUrlParser: true })
       const collection = await client.db(this.databaseName).collection(this.collectionName)
-      // console.log("getSchedules", this.param)
-      this.param.voided = {$eq: null}
-      const lastPage = Math.ceil(await collection.find().count() / param.limit)
-      const data = await collection.find(this.param)
-        .sort(param.sort)
-        .skip(param.skip)
-        .limit(param.limit)
-        .toArray()
+
+      if (this.param.voided == null) {
+        this.param.voided = {$eq: null}
+      }
+
+      const lastPage = (param.limit != null) ? Math.ceil(await collection.find().count() / param.limit) : 1
+
+      if (param.sort != null) {
+        collection.sort(param.sort)
+      }
+      if (param.skip != null) {
+        collection.skip(param.skip)
+      }
+      if (param.limit != null) {
+        collection.limit(param.limit)
+      }
+
+      const data = await collection.find(this.param).toArray()
       client.close()
       return { last_page: lastPage, data }
     }
@@ -150,6 +161,11 @@ class Scheduler {
       if(typeof param.executed !== 'undefined') {
         this.param.executed = (param.executed)?param.executed:null
       }
+      // voided
+      if(typeof param.voided !== 'undefined') {
+        this.param.voided = (param.voided)?param.voided : null
+      }
+
     }
 
     async deleteNotExecutedSchedule(){
@@ -169,6 +185,24 @@ class Scheduler {
       return this.result
     }
 
+    async physicalDeleteSchedule(id) {
+      const client = await this.mongo.connect(this.url, { useNewUrlParser: true })
+      const collection = await client.db(this.databaseName).collection(this.collectionName)
+      const ObjectId = require('mongodb').ObjectID
+
+      this.result = null
+      await collection.deleteOne({ '_id': ObjectId(id) })
+        .then(res => {
+          if (res.result.ok !== 1) throw new Error(`delete schedule is failed!! @ ${id}`)
+          console.log(`DELETED DB's SCHEDULE: ${s._id}`.bgRed)
+          this.result = true
+        })
+        .catch(err => console.error(err))
+        .then(() => {
+          if (client) client.close()
+        })
+      return this.result
+    }
     async updateNotified () {
       const client = await this.mongo.connect(this.url, { useNewUrlParser: true })
       const collection = await client.db(this.databaseName).collection(this.collectionName)

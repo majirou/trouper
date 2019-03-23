@@ -4,26 +4,6 @@ const app = express()
 const port = 8001
 const bodyParser = require('body-parser')
 
-class Logger{
-	constructor(log=null){
-        console.log("logger constructed")
-        this._log = log
-    }
-    set log(log) {
-        this._log = log
-      }
-    get log() {
-        return this._log
-    }
-}
-
-var msg = 'initializing...' ;
-var logger = new Logger(msg);
-
-// var scraper = require('./application/scraper' ) ;
-
-console.log(logger)
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -85,13 +65,11 @@ app.get( '/api/scenarios' , async function( req, res ) {
 
 // シナリオ取得
 app.get( '/api/scenario' , async function( req, res ) {
-    // console.log( "scenario get",req.body,req.query)
     if (req.query.id) {
         const Scenario = require( './application/scenario' )
         const s = new Scenario();
 
         const result = await s.getScenario(req.query.id)
-        // console.log( "end",result )
         if( result ){
             res.json( result )
         }else{
@@ -181,8 +159,8 @@ app.delete( '/api/scenario/:id' , async function( req, res ) {
         const Scenario = require( './application/scenario' )
         const s = new Scenario();
 
-        // 実際は論理削除
-        const result = await s.deleteScenario(req.params.id);
+        // 論理削除
+        const result = await s.logicalDeleteScenario(req.params.id);
         if( result ){
             res.json( { id: req.params.id, error: null } )
         }else{

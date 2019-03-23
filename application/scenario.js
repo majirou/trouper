@@ -33,6 +33,9 @@ class Scenario {
           'delete': { '$ne': true }
         }
       }
+      if (param.delete === true) {
+        match.$match.delete = { '$ne': null }
+      }
       aggregateParam.push(match)
 
       if (param.multiSearch) {
@@ -67,10 +70,15 @@ class Scenario {
         const sort = { '$sort': param.sort }
         aggregateParam.push(sort)
       }
-      const skip = { '$skip': param.skip }
-      aggregateParam.push(skip)
-      const limit = { '$limit': param.limit }
-      aggregateParam.push(limit)
+      if (param.skip != null) {
+        const skip = { '$skip': param.skip }
+        aggregateParam.push(skip)
+      }
+
+      if (param.limit!=null) {
+        const limit = { '$limit': param.limit }
+        aggregateParam.push(limit)
+      }
 
       // console.log(aggregateParam);
       const data = await collection.aggregate(aggregateParam).toArray()
@@ -128,7 +136,7 @@ class Scenario {
       return result
     }
 
-    async deleteScenario (id) {
+    async logicalDeleteScenario (id) {
       if (id == null) return false
 
       const client = await this.mongo.connect(this.url, { useNewUrlParser: true })
@@ -140,6 +148,27 @@ class Scenario {
         .then(res => {
           // console.log(res.result)
           if (res.result.nModified !== 1) throw new Error(`[${id}] update is failed!!`)
+        })
+        .catch(err => console.error(err))
+        .then(() => {
+          if (client) client.close()
+          result = true
+        })
+      return result
+    }
+
+    async physicalDeleteScenario (id) {
+      if (id == null) return false
+
+      const client = await this.mongo.connect(this.url, { useNewUrlParser: true })
+      const collection = await client.db(this.databaseName).collection(this.collectionName)
+      const ObjectId = require('mongodb').ObjectID
+
+      var result = null
+      await collection.deleteOne({ '_id': ObjectId(id) })
+        .then(res => {
+          if (res.result.ok !== 1) throw new Error(`[${id}] delete is failed!!`)
+          console.log(`DELETED DB's SCENARIO: ${s._id}`.bgRed)
         })
         .catch(err => console.error(err))
         .then(() => {
