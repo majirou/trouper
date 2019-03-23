@@ -1,11 +1,10 @@
 class Scheduler {
     constructor () {
-      // console.log("schedule constructed")
       this.mongo = require('mongodb').MongoClient
 
       const config = require('../config/database.js')
-      this.url = config.dbConf.url // 'mongodb://localhost:27017/scraper_db'
-      this.databaseName = config.dbConf.name // 'scraper_db'
+      this.url = config.dbConf.url
+      this.databaseName = config.dbConf.name
       this.collectionName = 'schedule'
       this.param = {}
       this.errors = []
