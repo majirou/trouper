@@ -4,16 +4,18 @@
 </template>
 
 <script>
-// @ is an alias to /src
 import MainGrid from '@/components/review/ReviewGrid.vue'
 
 export default {
-  name: 'maingrid',
+  name: 'Home',
   components: {
     MainGrid
   },
   mounted: function () {
-    // this.$lock()
+    const home = this.$router.options.routes[0]
+    this.$emit('breadcrumbs', [
+      { text: home.name, href: home.path }
+    ])
   }
 }
 </script>

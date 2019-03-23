@@ -1,6 +1,12 @@
 <template lang="pug">
   section
-    ReviewForm(:scenarioId="scenarioId" :newId="newId" :oldId="oldId" :panelHeight="panelHeight")
+    ReviewForm(
+      :scenarioId="scenarioId"
+      :newId="newId"
+      :oldId="oldId"
+      :panelHeight="panelHeight"
+      @scenarioName="setBreadcrumbs"
+    )
 </template>
 
 <script>
@@ -22,6 +28,13 @@ export default {
   methods: {
     resize: function () {
       console.log('resize')
+    },
+    setBreadcrumbs (name) {
+      const home = this.$router.options.routes[0]
+      this.$emit('breadcrumbs', [
+        { text: home.name, href: home.path },
+        { text: name, href: this.$router.history.current.path }
+      ])
     }
   },
   mounted: function () {
@@ -30,10 +43,13 @@ export default {
     this.oldId = this.$route.params.oldid
   },
   updated: function () {
-    // console.log('updated')
     // diffパネルの高さ設定
-    if (document.getElementsByTagName('header')) {
-      const headerMargin = parseInt(window.getComputedStyle(document.getElementsByTagName('header')[0]).marginBottom)
+    if (document.getElementsByTagName('header') && document.getElementsByTagName('header').length > 0) {
+      const headerMargin = parseInt(
+        window.getComputedStyle(
+          document.getElementsByTagName('header')[0]
+        ).marginBottom
+      )
       const bodyOffsetHeight = document.getElementsByTagName('header')[0].offsetHeight
       const navsOffsetHeight = document.getElementsByClassName('nav')[0].offsetHeight
       const marginBottom = parseInt(window.getComputedStyle(document.getElementsByTagName('body')[0]).fontSize)

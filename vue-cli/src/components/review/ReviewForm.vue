@@ -162,11 +162,12 @@ export default {
         const targetUrl = `${this.$apiUrl}/scenario?id=${id}`
         axios.get(targetUrl)
           .then((res) => {
-            console.log(res)
             if (res.status !== 200) throw new Error('データを取得できませんでした')
 
             this.scenario = res.data
             this.scenarioName = res.data.name
+            // for breadcrumbs
+            this.$emit('scenarioName', this.scenarioName)
           })
           .catch(err => console.error(err))
       }
