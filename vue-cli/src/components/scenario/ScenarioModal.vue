@@ -1,26 +1,26 @@
 <template lang="pug">
   transition(name="modal")
-    div.modal-mask(v-if="showModal")
-      div.modal-wrapper
-        div.modal-container
-          div.modal-header.d-flex
+    .modal-mask(v-if="showModal")
+      .modal-wrapper
+        .modal-container
+          .modal-header.d-flex
             div シナリオ{{type}}
-            div.small.text-secondary(v-if="scenario") ID:{{scenario._id}}
-          div.modal-body
-            div.form-group
+            .small.text-secondary(v-if="scenario") ID:{{scenario._id}}
+          .modal-body
+            .form-group
               label Base URL:
               input.form-control(disabled :value="url")
-            div.row
-              div.col-12.form-group
+            .row
+              .col-12.form-group
                 label シナリオ名:
                 input.form-control(type="text" v-model="scenarioName")
-              div.col-4.form-group
+              .col-4.form-group
                 label 次回予定日:
                 input.form-control(type="date" v-model="nextCrawlingDate")
-              div.col-4.form-group
+              .col-4.form-group
                 label 実行間隔:
                 div
-                  div.btn-group.btn-group-toggle.w-100
+                  .btn-group.btn-group-toggle.w-100
                     label.btn.border.border-primary.w-100(
                       :class="{active:isActiveInterval(1)}"
                     )
@@ -35,30 +35,30 @@
                       label.btn.btn-primary
                         input(type="radio" v-model="interval")
                         | 年１
-              div.col-4.form-group
+              .col-4.form-group
                 label Notification:
-                div.btn-group.btn-group-toggle.w-100
+                .btn-group.btn-group-toggle.w-100
                   label.btn.border.border-primary(
                     v-for="(v,i) in notifications"
                     :key="i"
                     :class="{active:isActiveNotification(v.value)}"
                   ) {{v.text}}
                     input(type="checkbox" :value="v.value" v-model="notification")
-              div.col-8.form-group
+              .col-8.form-group
                 label Mail:
                 // input.form-control(type="email" v-model="notificationMail")
                 select.form-control(v-model="notificationMail")
                   option(v-for="(v,i) in users" :value="v.mail") {{v.mail}}
-            div.alert.alert-danger.my-1(v-show="errors.length>0")
+            .alert.alert-danger.my-1(v-show="errors.length>0")
               ul.mb-0.pl-3
                 li(v-for="(v,i) in errors" :key="i") {{v}}
-          div.modal-footer
+          .modal-footer
             button.btn.btn-secondary.mr-3(@click="close") CLOSE
             button.btn.btn-primary(@click="save") SAVE
 </template>
 
 <script>
-import users from '@/../config/users.js'
+import users from '@/assets/users.json'
 
 export default {
   name: 'Scenario',
@@ -75,7 +75,7 @@ export default {
       nextCrawlingDate: null,
       interval: 1, // 1: weekly , 2: monthly
       errors: [],
-      users: users.data
+      users
     }
   },
   props: ['showModal', 'url', 'siteTitle', 'registeringErrors', 'dir', 'scenario', 'type'],
