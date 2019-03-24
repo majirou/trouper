@@ -6,8 +6,10 @@
         tr
           th スケジュールID
           th 実施日時
-          th.old {{getPrevId}}
-          th.new {{getcurrId}}
+          th.old 比較対象１
+          // {{getPrevId}}
+          th.new 比較対象２
+          // {{getcurrId}}
           th.text-center 無効化
       tbody(v-if="historyList.length > 0" )
         tr(v-for="(v,i) in historyList" :key="i")
@@ -36,7 +38,10 @@
             button.btn.btn-sm.btn-danger.py-0(@click="openVoidDialog" :value="v._id") 無効化
             span {{v.voided}}
     .text-right
-      button.btn.btn-primary(@click="createCompare()") 比較する
+      button.btn.btn-primary(
+        @click="createCompare()"
+        v-show="historyList.length > 2"
+      ) 比較する
     VoidDialog(:showDialog="showVoidDialog")
       div(slot="header")
         i.fas.fa-question-circle.mr-2
@@ -158,7 +163,7 @@ export default {
     },
     getCellClass (id) {
       let rt = ''
-      if (this.prevTarget._id === id) {
+      if (this.prevTarget != null && this.prevTarget._id === id) {
         rt = 'old'
       } else if (this.currTarget._id === id) {
         rt = 'new'

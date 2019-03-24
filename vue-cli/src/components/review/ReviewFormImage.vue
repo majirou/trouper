@@ -1,21 +1,21 @@
 <template lang="pug">
   section.diff-panel.p-2.border.border-gray.border-top-0
     .d-flex
-      .w-100.mr-1(:class="{'d-none':isMaximum(2)}")
+      .w-100.mr-1(:class="{'d-none':isMaximum(2)}" v-show="prevImageSource != null")
         .d-flex.mb-1
-          i.far.fa-window-minimize.fa-fw.mr-1(@click="maximizeImage()")
-          i.far.fa-window-maximize.fa-fw(@click="maximizeImage(1)" :class="{disable: isMaximum(1)}")
-          i.far.fa-clone.fa-fw(@click="toggleFilter(1)")
+          i.btn.far.fa-window-minimize.fa-fw.mr-1(@click="maximizeImage()")
+          i.btn.far.fa-window-maximize.fa-fw(@click="maximizeImage(1)" :class="{disable: isMaximum(1)}")
+          i.btn.far.fa-clone.fa-fw(@click="toggleFilter(1)")
           .ml-auto.mr-0
-            i.fas.fa-sync-alt.fa-fw(@click="checkSource")
+            i.btn.fas.fa-sync-alt.fa-fw.mr-2(@click="checkSource")
             span.old.rounded.px-2 {{prevTimestamp}}
       .w-100.mr-1(:class="{'d-none':isMaximum(1)}")
         .d-flex.mb-1
-          i.far.fa-window-minimize.fa-fw.mr-1(@click="maximizeImage()")
-          i.far.fa-window-maximize.fa-fw(@click="maximizeImage(2)" :class="{disable: isMaximum(2)}")
-          i.far.fa-clone.fa-fw(@click="toggleFilter(2)")
+          i.btn.far.fa-window-minimize.fa-fw.mr-1(@click="maximizeImage()" v-show="prevImageSource != null")
+          i.btn.far.fa-window-maximize.fa-fw(@click="maximizeImage(2)" :class="{disable: isMaximum(2)}" v-show="prevImageSource != null")
+          i.btn.far.fa-clone.fa-fw(@click="toggleFilter(2)" v-show="prevImageSource != null")
           .ml-auto.mr-0
-            i.fas.fa-sync-alt.fa-fw(@click="checkSource")
+            i.btn.fas.fa-sync-alt.fa-fw.mr-2(@click="checkSource" v-show="prevImageSource != null")
             span.new.rounded.px-2 {{currTimestamp}}
     .d-flex(style="overflow: scroll;margin-top: 1.25em;")
       div(style="position:relative" :class="{'d-none':isMaximum(2)}")

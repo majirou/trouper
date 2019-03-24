@@ -6,6 +6,7 @@
       :oldId="oldId"
       :panelHeight="panelHeight"
       @scenarioName="setBreadcrumbs"
+      @calcHeight="calcHeight"
     )
 </template>
 
@@ -26,8 +27,29 @@ export default {
     ReviewForm
   },
   methods: {
-    resize: function () {
-      console.log('resize')
+    calcHeight () {
+      // diffパネルの高さ設定
+      if (
+        document.getElementsByTagName('header') &&
+        document.getElementsByTagName('header').length > 0
+      ) {
+        const headerMargin = parseInt(
+          window.getComputedStyle(
+            document.getElementsByTagName('header')[0]
+          ).marginBottom
+        )
+        const bodyOffsetHeight = document.getElementsByTagName('header')[0].offsetHeight
+        const navsOffsetHeight = document.getElementsByClassName('nav')[0].offsetHeight
+        const marginBottom = parseInt(window.getComputedStyle(document.getElementsByTagName('body')[0]).fontSize)
+
+        const bodyHeight = window.innerHeight -
+                          bodyOffsetHeight -
+                          headerMargin -
+                          navsOffsetHeight -
+                          marginBottom
+        this.panelHeight = bodyHeight + 'px'
+        document.getElementsByClassName('diff-panel')[0].style.height = bodyHeight + 'px'
+      }
     },
     setBreadcrumbs (name) {
       const home = this.$router.options.routes[0]
@@ -41,27 +63,6 @@ export default {
     this.scenarioId = this.$route.params.id
     this.newId = this.$route.params.newid
     this.oldId = this.$route.params.oldid
-  },
-  updated: function () {
-    // diffパネルの高さ設定
-    if (document.getElementsByTagName('header') && document.getElementsByTagName('header').length > 0) {
-      const headerMargin = parseInt(
-        window.getComputedStyle(
-          document.getElementsByTagName('header')[0]
-        ).marginBottom
-      )
-      const bodyOffsetHeight = document.getElementsByTagName('header')[0].offsetHeight
-      const navsOffsetHeight = document.getElementsByClassName('nav')[0].offsetHeight
-      const marginBottom = parseInt(window.getComputedStyle(document.getElementsByTagName('body')[0]).fontSize)
-
-      const bodyHeight = window.innerHeight -
-                        bodyOffsetHeight -
-                        headerMargin -
-                        navsOffsetHeight -
-                        marginBottom
-      this.panelHeight = bodyHeight + 'px'
-      // document.getElementsByClassName('diff-panel')[0].style.height = bodyHeight + 'px'
-    }
   }
 }
 </script>

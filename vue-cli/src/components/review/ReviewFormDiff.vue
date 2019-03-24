@@ -1,7 +1,7 @@
 <template lang="pug">
   section.diff-panel.p-2.border.border-gray.border-top-0
     .d-flex(:class="{adjuster: closeDiffPanelFlag===0}")
-      .w-100.mr-1(v-show="expandIframeFlag!==2")
+      .w-100.mr-1(v-show="expandIframeFlag!==2 && prevTarget != null")
         .mb-1.d-flex.justify-content-start
           i.btn.fas.fa-chevron-left.fa-fw(@click="contractIframe()" v-show="expandIframeFlag===1")
           i.btn.fas.fa-chevron-right.fa-fw(@click="expandIframe(1)" v-show="expandIframeFlag===0")
@@ -12,17 +12,17 @@
             span.old.rounded.px-2 {{prevTimestamp}}
       .w-100(v-show="expandIframeFlag!==1")
         .mb-1.d-flex.justify-content-start
-          i.btn.fas.fa-chevron-right.fa-fw(@click="contractIframe()" v-show="expandIframeFlag===2")
-          i.btn.fas.fa-chevron-left.fa-fw(@click="expandIframe(2)" v-show="expandIframeFlag===0")
-          i.btn.fas.fa-chevron-up.fa-fw(@click="openDiffPanel()" v-show="closeDiffPanelFlag!==0")
-          i.btn.fas.fa-chevron-down.fa-fw(@click="closeDiffPanel(2)" v-show="closeDiffPanelFlag===0")
+          i.btn.fas.fa-chevron-right.fa-fw(@click="contractIframe()" v-show="expandIframeFlag===2 && prevTarget != null")
+          i.btn.fas.fa-chevron-left.fa-fw(@click="expandIframe(2)" v-show="expandIframeFlag===0 && prevTarget != null")
+          i.btn.fas.fa-chevron-up.fa-fw(@click="openDiffPanel()" v-show="closeDiffPanelFlag!==0 && prevTarget != null")
+          i.btn.fas.fa-chevron-down.fa-fw(@click="closeDiffPanel(2)" v-show="closeDiffPanelFlag===0 && prevTarget != null")
           .ml-auto.mr-0
             i.btn.fas.fa-external-link-alt.mr-2(@click="openLink(currIframeSource,true)")
             span.new.rounded.px-2 {{currTimestamp}}
     transition(name="fade")
       .d-flex.justify-content-between.h-100
         transition(name="fade")
-          .w-100.mr-1(v-show="expandIframeFlag!==2")
+          .w-100.mr-1(v-show="expandIframeFlag!==2 && prevTarget != null")
             iframe.w-100.h-100.border.border-gray(
               :src="prevIframeSource"
               @load="iframeLoaded"
@@ -211,7 +211,7 @@ export default {
   display: flex;
   flex-direction: column;
   .adjuster{
-    margin-bottom: 11px;
+    margin-bottom: .5em;
   }
   .disable {
     opacity: .25;

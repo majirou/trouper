@@ -1,15 +1,15 @@
 <template lang="pug">
   transition(name="dialog")
-    div.dialog-mask(v-if="showDialog")
-      div.dialog-wrapper
-        div.dialog-container
-          div.dialog-header.d-flex
+    .dialog-mask(v-if="showDialog")
+      .dialog-wrapper
+        .dialog-container(:class="getContainerClass()")
+          .dialog-header.d-flex
             slot(name="header") default header
-          div.dialog-body
+          .dialog-body
             slot(name="body") default body
-          div.dialog-footer
+          .dialog-footer
             slot(name="footer")
-              div.d-flex
+              .d-flex
                 button.btn.btn-secondary(@click="$emit('cancel')") キャンセル
                 button.btn.btn-primary.mr-0.ml-auto(@click="$emit('ok')")
                   slot(name="ok") OK
@@ -23,7 +23,12 @@ export default {
       errors: []
     }
   },
-  props: ['showDialog']
+  props: ['showDialog', 'classList'],
+  methods: {
+    getContainerClass () {
+      if (this.classList != null && this.classList.length > 0) return this.classList.join(' ')
+    }
+  }
 }
 </script>
 
@@ -55,6 +60,7 @@ button{
   max-width:480px;
   margin: .5em auto;
   background-color: #fff;
+  border-width: .25em !important;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
   transition: all .3s ease;

@@ -1,5 +1,5 @@
 <template lang="pug">
-  section
+  main
     //-
       header
         nav.navbar.navbar-expand.navbar-dark.bg-dark
@@ -10,7 +10,7 @@
               router-link.nav-link(to="/help") Help
             li.nav-item
               router-link.nav-link(to="/about") About
-    .breadcrumbs.mb-1
+    header.breadcrumbs.mb-1
       nav.bg-dark.text-light
         ul.nav
           li.nav-item(v-for="(v,i) in bc" :key="i")

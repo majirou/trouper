@@ -1,5 +1,5 @@
 <template lang="pug">
-  div.container-fluid
+  .container-fluid
     ul.nav.nav-tabs
       li.nav-item
         input#tab-page( type="radio" value="1" v-model="activeTabId")
@@ -10,7 +10,7 @@
       li.nav-item
         input#tab-image( type="radio" value="3" v-model="activeTabId")
         label.nav-link( :class="{active: isActiveTab(3)}" for="tab-image") 画像
-      li.nav-item
+      li.nav-item(v-show="!nocompared")
         input#tab-history( type="radio" value="4" v-model="activeTabId")
         label.nav-link( :class="{active: isActiveTab(4)}" for="tab-history") 履歴
       li.nav-item.ml-auto.mr-0
@@ -74,7 +74,7 @@
       span(slot="ok")
         i.fas.fa-check-circle.mr-2
         | OK
-    ErrorDialog(:showDialog="showErrorDialog")
+    ErrorDialog(:showDialog="showErrorDialog" :classList="['border','border-danger']")
       div(slot="header")
         i.fas.fa-exclamation-triangle.mr-2
         | エラー
@@ -82,7 +82,7 @@
         ul
           li(v-for="(v,i) in errors" :key="i") {{v}}
       div(slot="footer")
-        div.d-flex
+        .d-flex
           button.btn.btn-primary.mr-0.ml-auto(@click="closeErrorDialog")
             i.fas.fa-check-circle.mr-2
             | OK
@@ -127,7 +127,8 @@ export default {
       previousTimestamp: null,
       triggerPageDiff: false,
       triggerPartDiff: false,
-      triggerImageDiff: false
+      triggerImageDiff: false,
+      nocompared: false
     }
   },
   props: ['scenarioId', 'newId', 'oldId', 'panelHeight'],
@@ -140,15 +141,24 @@ export default {
       axios.get(targetUrl)
         .then(res => {
           if (res.status !== 200) throw new Error('正しいデータを取得できませんでした')
-          if (res.data.length === 1) throw new Error('スクレイピング結果が１件しかありません。')
+          if (res.data.length === 1) {
+            this.activeTabId = 5
+            this.nocompared = true
+            // throw new Error('スクレイピング結果が１件しかありません。')
+          }
           return res.data
         })
         .then(data => {
           this.targetSchedule = data[0]
-          this.previousSchedule = data[1]
-
           this.targetTimestamp = this.formatDatetime(data[0].saveDir)
-          this.previousTimestamp = this.formatDatetime(data[1].saveDir)
+
+          if (data[1] != null) {
+            this.previousSchedule = data[1]
+            this.previousTimestamp = this.formatDatetime(data[1].saveDir)
+          } else {
+            this.previousSchedule = null
+            this.previousTimestamp = null
+          }
         })
         .catch(err => {
           this.errors.push(err.message)
@@ -263,11 +273,17 @@ export default {
       this.getRecentlySchedule(this.scenarioId)
       this.getScenario(this.scenarioId)
     }
+  },
+  updated () {
+    this.$emit('calcHeight')
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.container-fluid{
+  min-width: 640px;
+}
 .nav{
   li{
     label {
