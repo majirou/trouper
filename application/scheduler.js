@@ -119,20 +119,36 @@ class Scheduler {
       if (this.param.voided == null) {
         this.param.voided = {$eq: null}
       }
+      const lastPage = (param.limit != null)
+                     ? Math.ceil(await collection.find(this.param).count() / param.limit)
+                     : 1
 
-      const lastPage = (param.limit != null) ? Math.ceil(await collection.find().count() / param.limit) : 1
+      const aggregateParam = []
+      const match = {}
+      if (Object.keys(this.param).length > 0 ) {
+        match.$match = {}
+        Object.keys(this.param).forEach( (v,i,a) => {
+          match.$match[v] = this.param[v]
+        })
+      }
+
+      match.$match.voided = (param.voided == null) ? { '$eq': null } : param.voided
+      aggregateParam.push(match)
 
       if (param.sort != null) {
-        collection.sort(param.sort)
+        const sort = { '$sort': param.sort }
+        aggregateParam.push(sort)
       }
       if (param.skip != null) {
-        collection.skip(param.skip)
+        const skip = { '$skip': param.skip }
+        aggregateParam.push(skip)
       }
-      if (param.limit != null) {
-        collection.limit(param.limit)
+      if (param.limit!=null) {
+        const limit = { '$limit': param.limit }
+        aggregateParam.push(limit)
       }
+      const data = await collection.aggregate(aggregateParam).toArray()
 
-      const data = await collection.find(this.param).toArray()
       client.close()
       return { last_page: lastPage, data }
     }

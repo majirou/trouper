@@ -168,7 +168,7 @@ app.delete( '/api/scenario/:id' , async function( req, res ) {
         }
 
     } else {
-        res.status(400).send("Bad Request")
+        res.status(400).send("Bad Request: " + req.params.id)
     }
 } )
 
@@ -184,7 +184,7 @@ app.get( '/api/schedules/:scenarioId/recent', async function (req, res) {
         res.json( result.data )
     } catch( err ) {
         console.log( "error" , err);
-        res.sendStatus(400).send("BadRequest")
+        res.sendStatus(400).send("BadRequest: " + req.params.scenarioId)
     }
 } )
 
@@ -215,7 +215,7 @@ app.get( '/api/history/:scenarioId', async function (req, res) {
         res.json(result.data)
     } catch (err) {
         console.log( "error" , err);
-        res.sendStatus(400).send("BadRequest")
+        res.sendStatus(400).send("BadRequest: " + req.params.scenarioId)
     }
 } )
 
