@@ -1,23 +1,37 @@
 'use strict'
+
+const config = require('./config/express.js').config
+
 const express = require('express')
 const app = express()
-const port = 8001
+const port = config['port']
 const bodyParser = require('body-parser')
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use(express.static('./public_html/'))
+// app.use(express.static('./public_html/'))
+app.use(express.static(config['static']))
 app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, HEAD');
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Max-Age', '86400');
+    res.header("Access-Control-Allow-Headers", config['accessControl']['allowHeaders']);
+    res.header('Access-Control-Allow-Methods', config['accessControl']['allowMethods']);
+    res.header('Access-Control-Allow-Credentials', config['accessControl']['allowCredentials'])
+    res.header('Access-Control-Max-Age', config['accessControl']['maxAge'])
     next();
 })
 app.listen( port , () => {
-  console.log('Express Server listened', port)
+    const os = require('os')
+    const nwif = os.networkInterfaces()
+
+    console.info('Express Server')
+    Object.keys(nwif).forEach(nw => {
+        Object.keys(nwif[nw]).forEach(i => {
+            if (nwif[nw][i].family === 'IPv4') {
+                console.info(`[${nw}] ${nwif[nw][i].address}:${port}`)
+            }
+        })
+    })
 } )
 
 // OPTIONSメソッドの実装

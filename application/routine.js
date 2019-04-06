@@ -177,16 +177,10 @@ class Routine {
                 .then( async res => {
                     if( res == null ) throw new Error( `Error`)
 
+                    const transporterConfig = require('../config/transporter.js').config
                     // mailerによるメール送信
                     const nodemailer = require('nodemailer');
-                    const transporter = nodemailer.createTransport({
-                      ssl: false,
-                      port : 25,
-                      use_authentication: false, // 認証しない
-                      tls: {
-                        rejectUnauthorized: false // do not fail on invalid certs
-                      }
-                    })
+                    const transporter = nodemailer.createTransport(transporterConfig)
 
                     const sendmail = async (subject,to,text,) => {
                       const mailOptions = {
@@ -198,8 +192,7 @@ class Routine {
 
                       await transporter.sendMail( mailOptions , (error, result ) => {
                         if(error){
-                          console.log("Error occured");
-                          console.log(error.message);
+                          console.error(error.message);
                           return;
                         }
                         console.log( result );
