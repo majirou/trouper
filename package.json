@@ -4,7 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "node ./server.js",
+    "scrape": "node ./run_scrape.js",
+    "notify": "node ./run_notify.js",
+    "sweep": "node ./run_sweep.js"
   },
   "author": "majirou",
   "license": "ISC",

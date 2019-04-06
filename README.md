@@ -3,6 +3,32 @@
 * 本プログラムは、puppeteerをベースにスクレイピング対象ページ、およびページ内の要素をユーザーフレンドリーに選択することを目的とするものです。
 * trouperのネーミングは、「人形（puppeteer）を操る劇団員」程度のイメージです。
 
+## 実行
+
+### サーバー起動
+
+```
+npm run serve
+```
+
+### 定期スクレイピング実行
+
+```
+npm run scrape
+```
+
+### 通知メール
+
+```
+npm run notify
+```
+
+### 不要シナリオ削除
+
+```
+npm run sweep
+```
+
 ## 構成
 
 ```
@@ -68,13 +94,13 @@ node ./server.js
 |column|name|description|example|
 |---|---|---|---|
 |_id|ID|MongoDBが自動採番するキー|ObjectId("5c6c37784df8b2359c82bba8")|
-|created|---|---|ISODate("2019-02-19T17:06:08.228Z")|
-|scheduled|---|---|ISODate("2019-02-19T17:06:00.962Z")|
-|executed|---|---|ISODate("2019-02-19T17:06:00.970Z")|
-|done|---|---|ISODate("2019-02-19T17:06:08.228Z")|
-|notified|---|---|ISODate("2019-02-19T17:06:08.228Z")|
-|scenarioId|---|---|ObjectId("5c6c37496c313e350d73178a")|
-|saveDir|---|---|20190220020602|
+|created|---|作成日時|ISODate("2019-02-19T17:06:08.228Z")|
+|scheduled|---|スクレイピング予定日時|ISODate("2019-02-19T17:06:00.962Z")|
+|executed|---|スクレイピング実施日時|ISODate("2019-02-19T17:06:00.970Z")|
+|done|---|スクレイピング完了日時|ISODate("2019-02-19T17:06:08.228Z")|
+|notified|---|スクレイピング結果通知日時|ISODate("2019-02-19T17:06:08.228Z")|
+|scenarioId|---|シナリオID|ObjectId("5c6c37496c313e350d73178a")|
+|saveDir|---|保存先ディレクトリ名|20190220020602|
 
 ### 定期処理
 
@@ -129,4 +155,14 @@ vue.js にて開発
 
 ### ImageMagick
 
+```
+# yum install ImageMagick
+```
+
+* ver.7系を入れないと、画像のサイズが異なる場合にエラーとなります(要remiレポジトリ有効化)
+
 ### MongoDB
+
+```
+yum -y install mongodb-org
+```
