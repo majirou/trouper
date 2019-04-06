@@ -18,9 +18,14 @@
                 li CLASS: {{activeElement.className}}
                 li NAME: {{activeElement.name}}
                 li INDEX: {{activeElement.index}}
-              div.d-flex
+              .d-flex.mb-1
                 button.btn.btn-sm.btn-primary.w-100.mr-1(@click="registerTarget") ウォッチ
-                button.btn.btn-sm.border-primary.bg-white.w-100.mr-1(@click="selectParentNode") 親ノード
+                button.btn.btn-sm.border-primary.bg-white.w-100.mr-1(@click="selectParentNode") 親選択
+                button.btn.btn-sm.border-primary.bg-white.w-100.mr-1(@click="clearWatched") 解除
+            //-
+              .d-flex
+                button.btn.btn-sm.border-primary.bg-white.w-100.mr-1(@click="hideSelected") 隠す
+                button.btn.btn-sm.border-primary.bg-white.w-100.mr-1(@click="showHiddenElements") 表示
           div.card.mt-2
             div.card-header.py-1 ウォッチリスト
             div.card-body.p-1(style="min-height:8em;")
@@ -159,6 +164,18 @@ export default {
           elems[i].classList.remove(this.activeTagClass)
         }
       }
+    },
+    clearWatched () {
+      this.clearActiveTag()
+      document.getElementById(this.iframeId)
+        .contentWindow
+        .postMessage({ type: 'clear' }, '*')
+    },
+    hideSelected () {
+
+    },
+    showHiddenElements () {
+
     },
     activateRegisteredContents: function (index, value, event) {
       this.clearActiveTag()
