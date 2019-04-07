@@ -3,6 +3,22 @@
 * 本プログラムは、puppeteerをベースにスクレイピング対象ページ、およびページ内の要素をユーザーフレンドリーに選択することを目的とするものです。
 * trouperのネーミングは、「人形（puppeteer）を操る劇団員」程度のイメージです。
 
+## インストール
+
+### ImageMagick
+
+```
+# yum install ImageMagick
+```
+
+* ver.7系を入れないと、画像のサイズが異なる場合にエラーとなります(要remiレポジトリ有効化)
+
+### MongoDB
+
+```
+yum -y install mongodb-org
+```
+
 ## 実行
 
 ### サーバー起動
@@ -28,6 +44,10 @@ npm run notify
 ```
 npm run sweep
 ```
+
+### クライアント
+
+`稼働サーバー/cli/` へアクセス
 
 ## 構成
 
@@ -149,20 +169,3 @@ vue.js にて開発
 ### fontawesome
 
 各種アイコンフォントに使用します。
-
-
-## インストール
-
-### ImageMagick
-
-```
-# yum install ImageMagick
-```
-
-* ver.7系を入れないと、画像のサイズが異なる場合にエラーとなります(要remiレポジトリ有効化)
-
-### MongoDB
-
-```
-yum -y install mongodb-org
-```

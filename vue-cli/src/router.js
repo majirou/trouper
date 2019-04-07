@@ -28,13 +28,6 @@ export default new Router({
       name: 'review',
       component: () => import('./views/Review.vue')
     },
-    /*
-    {
-      path: '/review/:id/:newid/:oldid',
-      name: 'review',
-      component: () => import('./views/Review.vue')
-    },
-    */
     {
       path: '/about',
       name: 'about',
