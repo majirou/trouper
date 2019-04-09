@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "serve": "node ./server.js",
+    "build": "node ./run_build.js",
     "scrape": "node ./run_scrape.js",
     "notify": "node ./run_notify.js",
     "sweep": "node ./run_sweep.js"

@@ -5,6 +5,13 @@
 
 ## インストール
 
+@ trouper's root
+
+```
+npm install
+npm run build
+```
+
 ### ImageMagick
 
 ```
@@ -20,6 +27,14 @@ yum -y install mongodb-org
 ```
 
 ## 実行
+
+### ビルド
+
+vue-cli内をビルドし、distディレクトリに対してシンボリックリンクを貼ります。
+
+```
+npm run build
+```
 
 ### サーバー起動
 
@@ -55,7 +70,7 @@ npm run sweep
 /
 ├─application // サーバーアプリケーション
 ├─public_html // フロント
-│ ├─cli
+│ ├─cli // シンボリックリンクで vue-cli/distへ
 │ └─data
 │   ├─tmp // 一時クロールの保管場所
 │   ├─common.js // iframe内アクティブ要素などの共通CSS
@@ -80,7 +95,7 @@ npm run sweep
 
 ### Node.js
 
-* 主なプログラムは、`Node.js` 上でのJavaScriptで記述しています。
+* 主なプログラムは、JavaScriptで記述しています。
 
 ### HTTPサーバー
 
