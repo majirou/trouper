@@ -8,8 +8,6 @@
               router-link.nav-link(to="/") Main
             li.nav-item
               router-link.nav-link(to="/help") Help
-            li.nav-item
-              router-link.nav-link(to="/about") About
     header.breadcrumbs.mb-1
       nav.bg-dark.text-light
         ul.nav

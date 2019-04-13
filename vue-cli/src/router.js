@@ -27,11 +27,6 @@ export default new Router({
       path: '/review/:id/',
       name: 'review',
       component: () => import('./views/Review.vue')
-    },
-    {
-      path: '/about',
-      name: 'about',
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
     }
   ]
 })
