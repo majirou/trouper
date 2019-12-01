@@ -1,7 +1,7 @@
 <template lang="pug">
   main
     MainGrid(
-      :data="gridData"
+      :records="gridData"
     )
 </template>
 
@@ -14,12 +14,12 @@ export default {
   },
   data () {
     return {
-      gridData: null
+      gridData: this.getTableData()
     }
   },
   methods: {
     getTableData () {
-      const url = `${this.$apiUrl}/scenarios/`
+      const url = `/programs/`
       const params = {
         page: this.currentPage,
         size: this.paginationSize
@@ -36,8 +36,6 @@ export default {
           // handle error
           console.log(err)
         })
-    },
-    calcHeight () {
     }
   }
 }
