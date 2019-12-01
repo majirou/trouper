@@ -23,6 +23,7 @@
     "express": "^4.16.4",
     "nuxt": "^2.0.0",
     "nuxt-fontawesome": "^0.4.0",
+    "puppeteer": "^2.0.0",
     "tabulator-tables": "^4.5.1"
   },
   "devDependencies": {
