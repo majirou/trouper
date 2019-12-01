@@ -1,6 +1,9 @@
 
 module.exports = {
   mode: 'universal',
+  router: {
+    base: '/',
+  },
   /*
   ** Headers of the page
   */
