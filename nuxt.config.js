@@ -2,7 +2,7 @@
 module.exports = {
   mode: 'universal',
   router: {
-    base: '/',
+    base: '/'
   },
   /*
   ** Headers of the page
@@ -31,6 +31,7 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
+    '@/plugins/utils'
   ],
   /*
   ** Nuxt.js dev-modules
