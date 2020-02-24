@@ -1,12 +1,12 @@
 const express = require('express')
 const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
-const bodyParser = require('body-parser');
+const bodyParser = require('body-parser')
 
 const app = express()
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
 
 // Import and Set Nuxt.js options
 const config = require('../nuxt.config.js')
@@ -14,14 +14,7 @@ config.dev = process.env.NODE_ENV !== 'production'
 
 const baseDir = config.router.base || '/'
 
-app.get(`${baseDir}programs/`, (req,res) => {
-  res.json([
-    {_id:'a', name:'name1'},
-    {_id:'ab', name:'name2'},
-    {_id:'abc', name:'name3'},
-    {_id:'abcd', name:'name4'}
-  ])
-})
+init()
 
 async function start () {
   // Init Nuxt.js
@@ -48,3 +41,26 @@ async function start () {
   })
 }
 start()
+
+function init () {
+  const ctrlPath = './controllers'
+  app.get(`${baseDir}programs/`, (req, res) => {
+    res.json([
+      { _id: 'a', name: 'name1' },
+      { _id: 'ab', name: 'name2' },
+      { _id: 'abc', name: 'name3' },
+      { _id: 'abcd', name: 'name4' }
+    ])
+  })
+
+  app.get(`${baseDir}temporary/`, async (req, res) => {
+    // console.log('param url:', req.query.url)
+    const url = req.query.url
+    const Scraper = require(`${ctrlPath}/TemporaryScrapeController.js`)
+
+    const ctrl = new Scraper()
+    await ctrl.scrape(url)
+    console.log('done')
+    res.json({a:1});
+  })
+}

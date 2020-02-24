@@ -1,14 +1,13 @@
-class PuppeteerModel{
-
-  constructor() {
-    this.requestUrl = ""
+class PuppeteerModel {
+  constructor (savePath) {
+    this.requestUrl = ''
     this.puppeteer = require('puppeteer')
     this.browser = null
-    this.screenshotPath = __dirname
+    this.screenshotPath = savePath
   }
 
-  async initBrowser(){
-    console.log("init browser...")
+  async initBrowser () {
+    console.log('init browser...')
     this.browser = await this.puppeteer.launch({
       args: [ '--lang=ja,en-US,en',
         '--no-sandbox',
@@ -19,13 +18,15 @@ class PuppeteerModel{
     })
   }
 
-  async scrape(url){
+  async scrape (url) {
+    process.on('unhandledRejection', console.dir)
+
     await this.initBrowser()
     console.log('start scrape...')
     const page = await this.browser.newPage()
 
     // reponse イベント
-    page.on('request', req => {
+    page.on('request', (req) => {
       try {
         console.log(req.resourceType(), req.url())
       } catch (err) {
