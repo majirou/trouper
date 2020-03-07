@@ -66,7 +66,8 @@ export default {
             if (res.status !== 200) {
               throw new Error('error')
             }
-            this.iframeSource = `${this.$dataUrl}/tmp/${res.data.result}`
+            console.log(res)
+            this.iframeSource = `/data/temporary/${res.data.result.dirName}/`
             // this.scrapedUrl = this.url
           })
           .catch((err) => {

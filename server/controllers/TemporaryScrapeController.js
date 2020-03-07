@@ -1,8 +1,8 @@
 
 class TemporaryScrapeController {
   constructor () {
-    const dirName = this._createDirName()
-    this.saveBasePath = __dirname + `/../data/temporary/${dirName}` // server/controllers
+    this.dirName = this._createDirName()
+    this.saveBasePath = __dirname + `/../data/temporary/${this.dirName}` // server/controllers
     console.log("saveBasePath",this.saveBasePath);
     this.makeTemporaryDirectory();
 
@@ -35,9 +35,9 @@ class TemporaryScrapeController {
       if (err.code === 'ENOENT') {
         try {
           // 保存先を作成する
-          console.log("mkdir ",path);
+          // console.log("mkdir ",path);
           fs.mkdirSync(this.saveBasePath);
-          console.log("mkdir done");
+          // console.log("mkdir done");
           result = true;
         } catch(err) {
           console.error("error", err);
@@ -53,7 +53,6 @@ class TemporaryScrapeController {
 
   async scrape (url) {
     await this.puppet.scrape(url)
-    console.log('TemporaryScrapeController scrape',url);
     return true;
   }
 }

@@ -3,6 +3,8 @@ const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
 const bodyParser = require('body-parser')
 
+const colors = require('colors')
+
 const app = express()
 
 app.use(bodyParser.json())
@@ -15,6 +17,8 @@ config.dev = process.env.NODE_ENV !== 'production'
 const baseDir = config.router.base || '/'
 
 init()
+
+start()
 
 async function start () {
   // Init Nuxt.js
@@ -40,7 +44,6 @@ async function start () {
     badge: true
   })
 }
-start()
 
 function init () {
   const ctrlPath = './controllers'
@@ -60,7 +63,14 @@ function init () {
 
     const ctrl = new Scraper()
     await ctrl.scrape(url)
-    console.log('done')
-    res.json({a:1});
+      .then(result => {
+        res.json({
+          result: {
+            dirName: ctrl.dirName
+          }
+        });
+      })
   })
+
+  app.use('/data', express.static( __dirname + '/data'));
 }
