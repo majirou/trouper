@@ -2,19 +2,41 @@
   main
     MainGrid(
       :records="gridData"
+      @modal="showRegisterModal"
+    )
+    RegisterModal(
+      v-if = "visibleRegisterModal"
+      @message = "setMessage"
+      style="z-index: 1000;"
+    )
+    MessageModal(
+      v-if="messageText"
+      :mode="messageMode"
+      :text="messageText"
+      @clear="clearMessage"
+      @cancel="hideMessageModal"
+      @ok="hideMessageModal"
+      style="z-index: 2000;"
     )
 </template>
 
 <script>
-import MainGrid from '~/components/ReviewGrid.vue'
+import MainGrid from '~/components/ProgramGrid.vue'
+import RegisterModal from '~/components/ProgramForm.vue'
+import MessageModal from '~/components/MessageModal.vue'
 
 export default {
   components: {
-    MainGrid
+    MainGrid, RegisterModal, MessageModal
   },
   data () {
     return {
-      gridData: this.getTableData()
+      gridData: this.getTableData(),
+      visibleRegisterModal: false,
+      // message modal
+      visibleMessageModal: false,
+      messageMode: 0, // 0:none , 1:info , 2:success, 3:warning , 4:danger
+      messageText: null
     }
   },
   methods: {
@@ -36,6 +58,21 @@ export default {
           // handle error
           console.log(err)
         })
+    },
+    showRegisterModal () {
+      this.visibleRegisterModal = true
+    },
+    setMessage (mode, text) {
+      console.log('setMessage', mode, text)
+      this.messageMode = mode // 0:none , 1:info , 2:success, 3:warning , 4:danger
+      this.messageText = text
+    },
+    clearMessage () {
+      this.messageMode = 0
+      this.messageText = null
+    },
+    hideMessageModal () {
+      this.clearMessage()
     }
   }
 }
