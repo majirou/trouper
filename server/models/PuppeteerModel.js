@@ -66,7 +66,7 @@ class PuppeteerModel {
     await page.goto(url, {waitUntil: 'networkidle2', timeout: 30000})
 
     // とりあえず、そのページで10秒待つことで描画されるものを待つ
-    await page.waitFor(10000); // ミリ秒
+    // await page.waitFor(3000); // ミリ秒
     // await page.waitForNavigation();
     // await page.goto( reqUrl , {waitUntil: "domcontentloaded",timeout:90000} ) ;
     console.log('page title...'.cyan + await page.title())
@@ -98,18 +98,14 @@ class PuppeteerModel {
 
     // localize evaluated html
     const createLocalizePath = () => {
-      const savePath = this.path.normalize(
-        this.saveBasePath + "/" +
-        this.url.host.replace(/[:]/g, "_")
+      const normalized = this.path.normalize(
+        this.url.host.replace(/[:]/g, "_") + this.url.pathname
       );
-      const dirs = this.url.pathname.split("/");
-      let pathname = this.url.pathname;
+      const dirs = normalized.split(this.path.sep);
       if (dirs[dirs.length-1] !== "" ) {
         dirs.pop();
-        pathname = dirs.join("/");
       }
-      return `${savePath}/${pathname}`;
-
+      return dirs.join(this.path.sep);
     } ;
     console.log("savePath:", createLocalizePath() )
 
@@ -213,17 +209,23 @@ class PuppeteerModel {
     let targetPath = null;
     if (sourcePath.match(/^[.]{1,2}\//)) {
       // ./ ../ にマッチする場合は、現リクエストを足す
+      // targetPath = `${saveBasePath}/${sourcePath}`;
+      console.log("saveBasePath".bgRed + saveBasePath)
       targetPath = `${saveBasePath}/${sourcePath}`;
+      console.log(sourcePath + " => " + targetPath.split("?")[0].blue);
     } else if (sourcePath.match(/^(http|https):\/\//) ) {
       // http://, https://などプロトコル始まりは, プロトコルを飛ばす
       const url = new URL(sourcePath);
       targetPath = `${url.host}/${url.pathname}`;
+      console.log(sourcePath + " => " + targetPath.split("?")[0].cyan);
     } else if (sourcePath.match(/^\/\//)) {
       // // はじまり
       targetPath = sourcePath.substr(2);
+      console.log(sourcePath + " => " + targetPath.split("?")[0]);
     } else if (sourcePath.match(/^\//)) {
       // / はじまり
       targetPath = `${this.url.host}/${sourcePath}`;
+      console.log(sourcePath + " => " + targetPath.split("?")[0].red);
     } else {
       targetPath = sourcePath;
       console.log(sourcePath + " => " + targetPath.split("?")[0].yellow);
