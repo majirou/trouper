@@ -193,6 +193,10 @@ class PuppeteerModel {
         }
       })
 
+      // add common.js for iframe messaging
+      $('head').append('<script src="/data/common.js"></script>')
+      $('head').append('<link rel="stylesheet" href="/data/common.css">')
+
       const beautify = require('js-beautify').html;
       result = beautify(
         $.html(),
