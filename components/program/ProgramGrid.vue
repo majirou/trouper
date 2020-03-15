@@ -34,7 +34,6 @@ export default {
     }
   },
   mounted () {
-    console.log(this.records)
     this.initTabulator()
   },
   methods: {

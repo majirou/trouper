@@ -4,7 +4,7 @@
       :records="gridData"
       @modal="showRegisterModal"
     )
-    RegisterModal(
+    RegisterForm(
       v-if = "visibleRegisterModal"
       @message = "setMessage"
       style="z-index: 1000;"
@@ -21,13 +21,13 @@
 </template>
 
 <script>
-import MainGrid from '~/components/ProgramGrid.vue'
-import RegisterModal from '~/components/ProgramForm.vue'
+import MainGrid from '~/components/program/ProgramGrid.vue'
+import RegisterForm from '~/components/program/ProgramForm.vue'
 import MessageModal from '~/components/MessageModal.vue'
 
 export default {
   components: {
-    MainGrid, RegisterModal, MessageModal
+    MainGrid, RegisterForm, MessageModal
   },
   data () {
     return {

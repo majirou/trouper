@@ -1,50 +1,90 @@
 <template lang="pug">
-  .modal-mask
-    .modal-wrapper
-      .modal-container
-        .container-fluid
-          .row
-            .col-12.mb-3
-              .input-group
-                input.form-control(
-                  type="text"
-                  placeholder="スクレイプ対象URL"
-                  v-model="targetUrl"
-                )
-                .input-group-append
-                  button.btn.btn-primary(@click="getTargetSite") 取得
-            .col-12.mb-3
-              iframe.w-100.h-100.border.border-info.rounded(
-                type  = "text/html"
-                :id   = "iframeId"
-                :src  = "iframeSource"
-                @load = "iframeLoaded"
-              )
-            .col-12
-              .active-element
-                .card
-                  .card-header.py-1 選択中の要素
-                  .card-body.p-1
-                    .card-title
-                    ul
-                      li TAG:
-                      li ID:
-                      li CLASS:
-                      li NAME:
-                      li INDEX:
+  .container-fluid
+    .row
+      .col-12.mb-1
+        .input-group
+          input.form-control(
+            type="text"
+            placeholder="スクレイプ対象URL"
+            v-model="targetUrl"
+          )
+          .input-group-append
+            button.btn.btn-primary(@click="getTargetSite") 取得
+      .col-12.mb-1
+        iframe.w-100.border.border-info.rounded(
+          type  = "text/html"
+          :id   = "iframeId"
+          :src  = "iframeSource"
+          @load = "iframeLoaded"
+        )
+      .col-12
+        ActiveElement(:elem="activeElement")
+        .active-element
+          .card
+            .card-header.py-1 選択中の要素
+            .card-body.p-1
+              ul.list-group.list-group-horizontal.list-unstyled
+                li TAG: {{activeElement.tag}}
+                li ID: {{activeElement.id}}
+                li CLASS: {{activeElement.className}}
+                li NAME: {{activeElement.name}}
+                li INDEX: {{activeElement.index}}
 </template>
 
 <script>
+import ActiveElement from '@/components/program/ActiveElement.vue'
+
 export default {
   name: 'ProgramForm',
+  components: {
+    ActiveElement
+  },
   data () {
     return {
+      activeElement: {
+        tag: null,
+        id: null,
+        className: null,
+        name: null,
+        index: null
+      },
       name: 'Scenario',
       targetUrl: null,
       iframeId: 'iframeId',
       iframeSource: null,
       scrapingApiUrl: '/temporary'
     }
+  },
+  mounted () {
+    // postMessage from iframe
+    window.addEventListener('message', (event) => {
+      // console.log('メッセージ受信イベント', event)
+      try {
+        if (typeof event.data === 'object') {
+          const json = event.data
+          switch (json.type) {
+            case 'get':
+              // 既存のアクティブタブを解除
+              this.activeElement = Object.assign({}, json.target)
+              break
+            case 'click':
+            case 'parent':
+              this.activeElement = Object.assign({}, json.target)
+              break
+            case 'title':
+              if (!this.scenarioId) {
+                this.setIframeTitle(json.target)
+              }
+              break
+            default:
+              console.log(event)
+              break
+          }
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }, false)
   },
   methods: {
     getTargetSite () {
@@ -68,7 +108,7 @@ export default {
             }
             console.log(res)
             this.iframeSource = `/data/temporary/${res.data.result.dirName}/`
-            // this.scrapedUrl = this.url
+            this.$unlock()
           })
           .catch((err) => {
             this.setWarningMessage(err.message)
@@ -96,6 +136,7 @@ export default {
 
         // postMessageにて、iframeとのやりとりを実現する
         contentWindow.postMessage({ type: 'init' }, '*')
+
         // this.$unlock()
       } catch (err) {
         this.setWarningMessage(err.message)
@@ -127,13 +168,11 @@ export default {
     transition: opacity .3s ease;
     padding: 1em;
   }
-
   .modal-wrapper {
     display: table-cell;
     vertical-align: middle;
     height: 100%;
   }
-
   .modal-container {
     margin: 0px auto;
     padding: 1em 0;
@@ -141,19 +180,26 @@ export default {
     border-radius: 0.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
     transition: all .3s ease;
-  }
 
+    iframe{
+      height: 70vh;
+    }
+  }
   .modal-enter {
     opacity: 0;
   }
-
   .modal-leave-active {
     opacity: 0;
   }
-
   .modal-enter .modal-container,
   .modal-leave-active .modal-container {
     -webkit-transform: scale(1.1);
     transform: scale(1.1);
   }
+.active-element li {
+    background-color: #5fbfce;
+    border-radius: 0.5em;
+    margin-right: .5em;
+    padding: 0 0.25em;
+}
 </style>
