@@ -19,16 +19,6 @@
         )
       .col-12
         ActiveElement(:elem="activeElement")
-        .active-element
-          .card
-            .card-header.py-1 選択中の要素
-            .card-body.p-1
-              ul.list-group.list-group-horizontal.list-unstyled
-                li TAG: {{activeElement.tag}}
-                li ID: {{activeElement.id}}
-                li CLASS: {{activeElement.className}}
-                li NAME: {{activeElement.name}}
-                li INDEX: {{activeElement.index}}
 </template>
 
 <script>
