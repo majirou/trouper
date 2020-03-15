@@ -7,9 +7,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // clear colored element(remove active class)
   const clearActiveElement = () => {
     const elems = document.getElementsByClassName(activeClass)
-    elems.forEach(elem => {
-      elem.classList.remove(activeClass)
+    Object.keys(elems).forEach(key => {
+      elems[key].classList.remove(activeClass)
     })
+  }
+
+  const createTarget = target => {
+      const id = (target.id != null) ? target.id : ''
+      const name = (target.name!= null) ? target.name : ''
+      const tag = (target.localName != null) ? target.localName : ''
+
+      // if it has class attr, remove active class and explode the attr
+      const tempClass = target.className.replace(activeClass, '').trim()
+      const className = ( tempClass ) ? `.${tempClass.replace(' ','.')}` : ''
+      const query = `${tag}${( id ) ? '#'+id : ''}${className}`
+      const elements = document.querySelectorAll(query)
+
+      // what number, the active class in elements
+      const index = Object.keys(elements).find(
+        key => elements[key].classList.contains(activeClass)
+      );
+
+      return {tag, id, name, className, index}
   }
 
   // clear colored element at right clicked
@@ -20,13 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('message', event => {
     const postMessageWithTargetSelector = (type, target) => {
+      console.log(type, target, event.origin)
       event.source.postMessage(
-        { type, data: createTarget(target) }, event.origin
+        { type, target: createTarget(target) }, event.origin
       )
     }
-    // response to origin
-    // let elem = null
-    // const type = event.data.type
     switch( event.data.type ) {
       case 'init':
         document.body.addEventListener(
@@ -57,7 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     + (data.id) ? `#${data.id}` : ''
                     + (data.class) ? `.${data.class.replace(' ','.')}` : ''
         const elems = document.querySelectorAll(query)
-        elems[data.index].classList.add(activeClass)
+        if (elems[data.index] != null) {
+          elems[data.index].classList.add(activeClass)
+        }
         break;
       default:
         console.error(event)
