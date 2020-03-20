@@ -17,17 +17,25 @@
           :src  = "iframeSource"
           @load = "iframeLoaded"
         )
-      .col-12
-        ActiveElement(:elem="activeElement")
+      .col-11
+        ActiveElement(
+          :elem="activeElement"
+        )
+        RegisteredElements(
+          :elems="registered"
+        )
+      .col-1
+        button.btn.btn-primary hoge
 </template>
 
 <script>
 import ActiveElement from '@/components/program/ActiveElement.vue'
+import RegisteredElements from '@/components/program/RegisteredElements.vue'
 
 export default {
   name: 'ProgramForm',
   components: {
-    ActiveElement
+    ActiveElement, RegisteredElements
   },
   data () {
     return {
