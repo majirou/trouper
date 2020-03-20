@@ -4,30 +4,35 @@
       :records="gridData"
       @modal="showRegisterModal"
     )
-    RegisterForm(
-      v-if = "visibleRegisterModal"
-      @message = "setMessage"
-      style="z-index: 1000;"
+    Modal#register(
+      v-if="visibleRegisterModal"
+      @close="hideRegisterModal"
     )
-    MessageModal(
+      template(slot="body")
+        RegisterForm(
+          @message = "setMessage"
+        )
+    Modal#message(
       v-if="messageText"
-      :mode="messageMode"
-      :text="messageText"
-      @clear="clearMessage"
       @cancel="hideMessageModal"
       @ok="hideMessageModal"
-      style="z-index: 2000;"
+      :zIndex=10000
+      :visibleFooter="true"
     )
+      template(slot="body")
+        p.alert(:class="" ) {{messageMode}} {{messageText}}
 </template>
 
 <script>
-import MainGrid from '~/components/program/ProgramGrid.vue'
-import RegisterForm from '~/components/program/ProgramForm.vue'
-import MessageModal from '~/components/MessageModal.vue'
+import MainGrid from '~/components/program/ProgramGrid'
+import Modal from '~/components/common/BaseModal'
+import RegisterForm from '~/components/program/ProgramForm'
 
 export default {
   components: {
-    MainGrid, RegisterForm, MessageModal
+    MainGrid,
+    Modal,
+    RegisterForm
   },
   data () {
     return {
@@ -62,6 +67,9 @@ export default {
     showRegisterModal () {
       this.visibleRegisterModal = true
     },
+    hideRegisterModal () {
+      this.visibleRegisterModal = false
+    },
     setMessage (mode, text) {
       console.log('setMessage', mode, text)
       this.messageMode = mode // 0:none , 1:info , 2:success, 3:warning , 4:danger
@@ -80,5 +88,4 @@ export default {
 
 <style src='@/node_modules/tabulator-tables/dist/css/tabulator.min.css'></style>
 <style lang="scss">
-
 </style>
