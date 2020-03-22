@@ -1,4 +1,3 @@
-
 const lock = function (message, selector = null) {
   const lockMaskClassName = 'lock-mask'
   const lockWrapperClassName = 'lock-wrapper'
@@ -36,17 +35,11 @@ const unlock = function (selector) {
   selector = selector || 'body'
   if (typeof selector === 'string') {
     const docs = document.querySelectorAll(selector)
-    for (const i in docs) {
-      if (docs.hasOwnProperty(i)) { // && docs[i].classList.contains(lockMaskClassName)) {
-        const docsChildren = docs[i].children
-        if (docsChildren.length > 0) {
-          for (const ii in docsChildren) {
-            if (
-              docsChildren.hasOwnProperty(ii) &&
-              docsChildren[ii].classList.contains(lockMaskClassName)
-            ) {
-              docsChildren[ii].parentNode.removeChild(docsChildren[ii])
-            }
+    for (const doc of docs) {
+      if (doc.children.length > 0) {
+        for (const children of doc.children) {
+          if (children.classList.contains(lockMaskClassName)) {
+            children.parentNode.removeChild(children)
           }
         }
       }
