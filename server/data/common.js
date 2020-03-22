@@ -55,6 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
           },
           true
         )
+
+        elem = document.head.getElementsByTagName('title')
+        if (elem.length > 0) {
+          event.source.postMessage(
+            { type: 'title', data: elem[0].innerText },
+            event.origin
+          )
+        }
+        break;
       case 'clear':
         clearActiveElement()
         break;
@@ -88,6 +97,15 @@ document.addEventListener('DOMContentLoaded', () => {
             parent.classList.add(activeClass)
             // to get selector the parent node
             postMessageWithTargetSelector('click', parent)
+        }
+        break;
+      case 'title':
+        elem = document.head.getElementsByTagName('title')
+        if (elem.length > 0) {
+          event.source.postMessage(
+            { type: 'title', data: elem[0].innerText },
+            event.origin
+          )
         }
         break;
       default:

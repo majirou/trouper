@@ -51,7 +51,9 @@
           :elems="registeredElementList"
         )
       .col-12
-        ScheduleForm
+        ScheduleForm(
+          :page-title="iframeTitle"
+        )
       .col-11
       .col-1
         button.btn.btn-sm.btn-warning.h-100.w-100(@click="register")
@@ -82,6 +84,7 @@ export default {
       name: 'Scenario',
       targetUrl: null,
       iframeId: 'iframeId',
+      iframeTitle: null,
       iframeSource: null,
       isIframeLoaded: false,
       scrapingApiUrl: '/temporary',
@@ -91,7 +94,6 @@ export default {
   mounted () {
     // postMessage from iframe
     window.addEventListener('message', (event) => {
-      // console.log('メッセージ受信イベント', event)
       try {
         if (typeof event.data === 'object') {
           const json = event.data
@@ -105,9 +107,7 @@ export default {
               this.activeElement = Object.assign({}, json.target)
               break
             case 'title':
-              if (!this.scenarioId) {
-                this.setIframeTitle(json.target)
-              }
+              this.iframeTitle = json.data
               break
             default:
               console.log(event)

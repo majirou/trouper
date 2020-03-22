@@ -35,6 +35,12 @@ import MailConfig from '~/assets/mail.config.json'
 export default {
   name: 'ScheduleForm',
   props: {
+    pageTitle: {
+      type: String,
+      default: () => {
+        return ''
+      }
+    }
   },
   data () {
     return {
@@ -56,6 +62,11 @@ export default {
     }
   },
   mounted () {
+  },
+  watch: {
+    pageTitle () {
+      this.programName = this.pageTitle
+    }
   },
   methods: {
     isActiveInterval (value) {
