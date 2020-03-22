@@ -1,6 +1,6 @@
 <template lang="pug">
   .container-fluid.py-3
-    .row
+    .row(v-show="isStep(0)")
       .col-12.mb-1
         .input-group
           input.form-control(
@@ -29,19 +29,45 @@
           :elems="registeredElementList"
         )
       .col-1
-        button.btn.btn-sm.btn-warning.h-100.w-100
+        button.btn.btn-sm.btn-warning.h-100.w-100(@click="nextStep")
           font-awesome-icon.mr-2(icon="chevron-circle-down")
           | 次へ
+    .row(v-show="isStep(1)")
+      .col-11.mb-3
+      .col-1.mb-3
+        button.btn.btn-sm.btn-warning.h-100.w-100(@click="backStep")
+          font-awesome-icon.mr-2(icon="chevron-circle-up")
+          | 戻る
+      .col-12.mb-1
+        .input-group
+          .input-group-prepend
+            span.input-group-text(style="padding:0 1.25em;") 対象URL
+          input.form-control(
+            type="text"
+            :value="targetUrl"
+          )
+      .col-12
+        RegisteredElements(
+          :elems="registeredElementList"
+        )
+      .col-12
+        ScheduleForm
+      .col-11
+      .col-1
+        button.btn.btn-sm.btn-warning.h-100.w-100(@click="register")
+          font-awesome-icon.mr-2(icon="save")
+          | 登録
 </template>
 
 <script>
 import ActiveElement from '@/components/program/ActiveElement.vue'
 import RegisteredElements from '@/components/program/RegisteredElements.vue'
+import ScheduleForm from '@/components/program/ScheduleForm.vue'
 
 export default {
   name: 'ProgramForm',
   components: {
-    ActiveElement, RegisteredElements
+    ActiveElement, RegisteredElements, ScheduleForm
   },
   data () {
     return {
@@ -58,7 +84,8 @@ export default {
       iframeId: 'iframeId',
       iframeSource: null,
       isIframeLoaded: false,
-      scrapingApiUrl: '/temporary'
+      scrapingApiUrl: '/temporary',
+      step: 0
     }
   },
   mounted () {
@@ -174,6 +201,18 @@ export default {
     },
     selectParentNode (element) {
       this._postMessage({ type: 'parent' }, '*')
+    },
+    isStep (num) {
+      return this.step === parseInt(num)
+    },
+    backStep () {
+      this.step--
+    },
+    nextStep () {
+      this.step++
+    },
+    register () {
+      // 登録する処理
     }
   }
 }
