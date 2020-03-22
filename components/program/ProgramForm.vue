@@ -173,7 +173,7 @@ export default {
       }
     },
     selectParentNode (element) {
-      console.log(element)
+      this._postMessage({ type: 'parent' }, '*')
     }
   }
 }

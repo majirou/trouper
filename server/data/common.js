@@ -13,22 +13,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const createTarget = target => {
-      const id = (target.id != null) ? target.id : ''
-      const name = (target.name!= null) ? target.name : ''
-      const tag = (target.localName != null) ? target.localName : ''
+    const id = (target.id != null) ? target.id : ''
+    const name = (target.name!= null) ? target.name : ''
+    const tag = (target.localName != null) ? target.localName : ''
 
-      // if it has class attr, remove active class and explode the attr
-      const tempClass = target.className.replace(activeClass, '').trim()
-      const className = ( tempClass ) ? `.${tempClass.replace(' ','.')}` : ''
-      const query = `${tag}${( id ) ? '#'+id : ''}${className}`
-      const elements = document.querySelectorAll(query)
+    // if it has class attr, remove active class and explode the attr
+    const tempClass = target.className.replace(activeClass, '').trim()
+    const className = ( tempClass ) ? `.${tempClass.replace(' ','.')}` : ''
+    const query = `${tag}${( id ) ? '#'+id : ''}${className}`
+    const elements = document.querySelectorAll(query)
 
-      // what number, the active class in elements
-      const index = Object.keys(elements).find(
-        key => elements[key].classList.contains(activeClass)
-      );
-
-      return {tag, id, name, className, index}
+    // what number, the active class in elements
+    const index = Object.keys(elements).find(
+      key => elements[key].classList.contains(activeClass)
+    );
+    return {tag, id, name, className, index}
   }
 
   // clear colored element at right clicked
@@ -39,11 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('message', event => {
     const postMessageWithTargetSelector = (type, target) => {
-      console.log(type, target, event.origin)
       event.source.postMessage(
         { type, target: createTarget(target) }, event.origin
       )
     }
+
+    let elem = null;
     switch( event.data.type ) {
       case 'init':
         document.body.addEventListener(
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearActiveElement()
         break;
       case 'get':
-        const elem = document.body.getElementsByClassName(activeClass)
+        elem = document.body.getElementsByClassName(activeClass)
         if( elem.length === 1){
           window.scrollTo(0, elem[0].getBoundingClientRect().top)
           postMessageWithTargetSelector('get', elem[0] )
@@ -76,6 +76,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const elems = document.querySelectorAll(query)
         if (elems[data.index] != null) {
           elems[data.index].classList.add(activeClass)
+        }
+        break;
+      case 'parent':
+        elem = document.body.getElementsByClassName(activeClass)
+        if (elem.length === 1) {
+            // add active class on parent node
+            const parent = elem[0].parentNode
+            // then clear active element and add active class to the paranet node
+            clearActiveElement()
+            parent.classList.add(activeClass)
+            // to get selector the parent node
+            postMessageWithTargetSelector('click', parent)
         }
         break;
       default:
