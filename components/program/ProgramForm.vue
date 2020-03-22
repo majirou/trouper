@@ -1,5 +1,5 @@
 <template lang="pug">
-  .container-fluid
+  .container-fluid.py-3
     .row
       .col-12.mb-1
         .input-group
@@ -17,15 +17,21 @@
           :src  = "iframeSource"
           @load = "iframeLoaded"
         )
-      .col-11
+      .col-11.pr-0
         ActiveElement(
           :elem="activeElement"
+          @add="registerTargetNode"
+          @parent="selectParentNode"
+          @clear=""
+          :disable="!isIframeLoaded"
         )
         RegisteredElements(
-          :elems="registered"
+          :elems="registeredElementList"
         )
       .col-1
-        button.btn.btn-primary hoge
+        button.btn.btn-sm.btn-warning.h-100.w-100
+          font-awesome-icon.mr-2(icon="chevron-circle-down")
+          | 次へ
 </template>
 
 <script>
@@ -46,10 +52,12 @@ export default {
         name: null,
         index: null
       },
+      registeredElementList: [],
       name: 'Scenario',
       targetUrl: null,
       iframeId: 'iframeId',
       iframeSource: null,
+      isIframeLoaded: false,
       scrapingApiUrl: '/temporary'
     }
   },
@@ -96,6 +104,7 @@ export default {
           throw new Error('Begin the URL with http or https')
         }
 
+        this.isIframeLoaded = false
         this.$lock('Getting HTML...')
         const targetUrl = `${this.scrapingApiUrl}/?url=${this.targetUrl}`
         console.log('targetUrl', this.scrapingApiUrl, this.targetUrl)
@@ -106,6 +115,7 @@ export default {
             }
             console.log(res)
             this.iframeSource = `/data/temporary/${res.data.result.dirName}/`
+            this.isIframeLoaded = true
             this.$unlock()
           })
           .catch((err) => {
@@ -119,23 +129,21 @@ export default {
         this.$unlock()
       }
     },
+    _postMessage (messageObject, targetOrigin = '*') {
+      const iframe = document.getElementById(this.iframeId)
+      if (iframe == null || iframe.src == null) {
+        throw new Error('iframe source is empty')
+      }
+      const contentWindow = iframe.contentWindow
+      if (iframe.contentWindow == null) {
+        throw new Error('iframe content is empty')
+      }
+      // postMessageにて、iframeとのやりとりを実現する
+      contentWindow.postMessage(messageObject, targetOrigin)
+    },
     iframeLoaded () {
-      console.log('iframe is loaded')
       try {
-        const iframe = document.getElementById(this.iframeId)
-        if (iframe == null || iframe.src == null) {
-          throw new Error('iframe source is empty')
-        }
-
-        const contentWindow = iframe.contentWindow
-        if (iframe.contentWindow == null) {
-          throw new Error('iframe content is empty')
-        }
-
-        // postMessageにて、iframeとのやりとりを実現する
-        contentWindow.postMessage({ type: 'init' }, '*')
-
-        // this.$unlock()
+        this._postMessage({ type: 'init' }, '*')
       } catch (err) {
         this.setWarningMessage(err.message)
         console.error(err)
@@ -148,6 +156,24 @@ export default {
     setInformationMessage (message) {
       console.log('setInformationMessage')
       this.$emit('message', 1, message)
+    },
+    registerTargetNode (element) {
+      // check the element is already registered
+      const findIndex = this.registeredElementList.findIndex((v) => {
+        return (
+          v.tag === element.tag &&
+          v.id === element.id &&
+          v.name === element.name &&
+          v.className === element.className &&
+          v.index === element.index
+        )
+      })
+      if (findIndex === -1) {
+        this.registeredElementList.push(element)
+      }
+    },
+    selectParentNode (element) {
+      console.log(element)
     }
   }
 }

@@ -78,8 +78,6 @@ export default {
     border-radius: 0.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
     transition: all .3s ease;
-    // padding: 1em 0;
-    padding: 0;
 
     .modal-close{
       position: absolute;

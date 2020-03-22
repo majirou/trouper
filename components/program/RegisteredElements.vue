@@ -4,7 +4,9 @@
       span 登録要素
     .card-body.p-1
       .d-flex
-        .badge.badge-primery(v-for="(v,i) in elems")
+        .badge.badge-primary(v-for="(v,i) in elems")
+          span {{v.tag}}
+        //
           span TAG: {{v.tag}}
           span ID: {{v.id}}
           span CLASS: {{v.className}}
@@ -30,5 +32,31 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.card-body{
+  overflow-x: scroll;
+  width: 50vw;
+
+  .badge{
+    margin-right: 0.5em;
+  }
+
+  /*スクロールバー全体*/
+  &::-webkit-scrollbar {
+      width: 10px;
+  }
+
+  /*スクロールバーの軌道*/
+  &::-webkit-scrollbar-track {
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, .1);
+  }
+
+  /*スクロールバーの動く部分*/
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 50, .5);
+    border-radius: 10px;
+    box-shadow:0 0 0 1px rgba(255, 255, 255, .3);
+  }
+}
 </style>
