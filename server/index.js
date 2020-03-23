@@ -56,6 +56,25 @@ function init () {
     ])
   })
 
+  // register program
+  app.post(`${baseDir}program/`, async (req, res) => {
+    console.log(req.query, req.body)
+    try {
+      if (req.body == null) throw new Error('No Body')
+      const url = req.body.url
+      const schedule = req.body.schedule
+      const elements = req.body.elements
+
+      const Program = require(`${ctrlPath}/ProgramController.js`)
+      const ctrl = new Program()
+      await ctrl.register(url, schedule, elements)
+      res.send('test')
+    } catch(e) {
+      console.error(e);
+      res.status(404).send(e.message)
+    }
+  })
+
   app.get(`${baseDir}temporary/`, async (req, res) => {
     // console.log('param url:', req.query.url)
     const url = req.query.url
