@@ -28,14 +28,14 @@
         RegisteredElements(
           :elems="registeredElementList"
         )
-      .col-1
-        button.btn.btn-sm.btn-warning.h-100.w-100(@click="nextStep")
+      .col-1.pl-2
+        button.btn.btn-warning.h-100.w-100.px-1(@click="nextStep")
           font-awesome-icon.mr-2(icon="chevron-circle-down")
           | 次へ
     .row(v-show="isStep(1)")
       .col-11.mb-3
       .col-1.mb-3
-        button.btn.btn-sm.btn-warning.h-100.w-100(@click="backStep")
+        button.btn.btn-sm.btn-secondary.h-100.w-100(@click="backStep")
           font-awesome-icon.mr-2(icon="chevron-circle-up")
           | 戻る
       .col-12.mb-1
@@ -53,12 +53,13 @@
       .col-12
         ScheduleForm(
           :page-title="iframeTitle"
+          :schedule-data="scheduleData"
         )
       .col-11
-      .col-1
-        button.btn.btn-sm.btn-warning.h-100.w-100(@click="register")
+      .col-12.text-center.mt-3
+        button.btn.btn-lg.btn-warning.h-100(@click="register")
           font-awesome-icon.mr-2(icon="save")
-          | 登録
+          | 上記内容で登録する
 </template>
 
 <script>
@@ -81,6 +82,13 @@ export default {
         index: null
       },
       registeredElementList: [],
+      scheduleData: {
+        name: null,
+        date: null,
+        interval: 1,
+        notification: [1],
+        mail: null
+      },
       name: 'Scenario',
       targetUrl: null,
       iframeId: 'iframeId',
@@ -213,6 +221,7 @@ export default {
     },
     register () {
       // 登録する処理
+      console.log(this.scheduleData)
     }
   }
 }
