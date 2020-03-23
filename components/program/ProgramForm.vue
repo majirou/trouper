@@ -9,7 +9,9 @@
             v-model="targetUrl"
           )
           .input-group-append
-            button.btn.btn-primary(@click="getTargetSite") 取得
+            button.btn.btn-primary(@click="getTargetSite")
+              font-awesome-icon.mr-2(icon="file-download")
+              | 取得
       .col-12.mb-1
         iframe.w-100.border.border-info.rounded(
           type  = "text/html"
@@ -89,13 +91,13 @@ export default {
         notification: [1],
         mail: null
       },
-      name: 'Scenario',
       targetUrl: null,
       iframeId: 'iframeId',
       iframeTitle: null,
       iframeSource: null,
       isIframeLoaded: false,
       scrapingApiUrl: '/temporary',
+      registerApiUrl: '/program',
       step: 0
     }
   },
@@ -220,8 +222,27 @@ export default {
       this.step++
     },
     register () {
-      // 登録する処理
-      console.log(this.scheduleData)
+      const postData = {
+        url: this.targetUrl,
+        schedule: this.scheduleData,
+        elements: this.registeredElementList
+      }
+      this.$lock(`登録中...`)
+      this.$axios
+        .post(this.registerApiUrl, postData)
+        .then((res) => {
+          if (res.status !== 200) {
+            throw new Error('error')
+          }
+          console.log(res)
+        })
+        .catch((err) => {
+          this.setWarningMessage(err.message)
+          console.error(err)
+        })
+        .finally(() => {
+          this.$unlock()
+        })
     }
   }
 }
