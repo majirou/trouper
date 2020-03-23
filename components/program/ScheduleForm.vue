@@ -51,7 +51,7 @@ export default {
         { text: '週１', value: 1 },
         { text: '月１', value: 2 }
       ],
-      notification: [],
+      notification: [1],
       notificationList: [
         { text: 'All', value: 1 },
         { text: 'Part', value: 2 },
