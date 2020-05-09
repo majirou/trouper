@@ -10,14 +10,17 @@ class MongoDbModel {
       this.databaseName = config.name
       this.collectionName = config.collection
     }
+    this.params = null
+    this.msg = []
   }
   /**
    * create new url to connect mongodb
-   * config is expected follow
+   * the following is expected
    * "mongodb":{
    *   "host": String,
    *   "port": Number,
-   *   "name": String
+   *   "name": String,
+   *   "collection": String
    * }
    * @param {Object} config
    */
@@ -44,18 +47,88 @@ class MongoDbModel {
   }
 
   async addProgram(param) {
+    param.created = new Date()
+    return this._insert(param)
+  }
+
+  async _insert(param) {
     if (this.client == null) {
       await this._connect()
     }
-    const collection = await client.db(this.databaseName).collection(this.collectionName)
+    const collection = await this.client.db(this.databaseName).collection(this.collectionName)
     await collection.insertOne(param)
       .then(res => {
         console.log('inserted', res.result)
         this.id = res.insertedId
       })
       .catch(err => console.error(err))
-      .then(() => { if (client) client.close() })
+      .then(() => { if (this.client != null) this.client.close() })
     return this.id
+  }
+
+  validRegisterParameters(){
+    let result ;
+    try {
+      if(this.params == null) {
+        throw new Error('Paramter is empty.')
+      }
+      let valid = true
+      if (!this._validateUrl(this.params.url)) {
+        valid = false
+        this.msg.push(`Validation Error @ Url: ${url}`)
+      }
+      if (!this._validateSchedule(this.params.schedule)) {
+        valid = false
+        this.msg.push('Validation Error @ Schedule')
+      }
+      // if (!this._validateActions(actions)) {
+      //   valid = false
+      //   this.msg.push(`Validation Error @ Actions`)
+      // }
+      if (!valid) {
+        throw new Error('Validation is failed.')
+      }
+      result = true
+    } catch(e) {
+      result = false
+    }
+    return result
+  }
+
+  _validateUrl (url) {
+    return /^(https?)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$/.test(url)
+  }
+
+  _validateSchedule (schedule) {
+    return (
+      schedule != null &&
+      schedule.name != null &&
+      schedule.date != null &&
+      this._validateDate(schedule.date) &&
+      schedule.interval > 0 &&
+      schedule.interval < 3 &&
+      schedule.notification != null &&
+      Array.isArray(schedule.notification) &&
+      schedule.mail != null
+    )
+  }
+
+  _validateDate(date){
+    const arr = date.split("-")
+    return (
+      (arr.length === 3) &&
+      (arr[0] >= 2020 && arr[0] <= 2099) &&
+      (arr[1] >= 1 && arr[1] <= 12) &&
+      (arr[2] >= 1 && arr[2] <= 31)
+    )
+  }
+
+  _validateActions (actions) {
+    return true
+  }
+
+  setRegisterParameters(params){
+    this.params = params
   }
 }
 module.exports = MongoDbModel
