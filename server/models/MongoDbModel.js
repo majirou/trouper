@@ -2,10 +2,14 @@ class MongoDbModel {
   constructor () {
     console.log('mongo db model constructing...'.cyan);
 
-    const config = require('../config/db.config.json')
-    this.url = this._createUrlByConfig(config)
-    this.mongo = require('mongodb').MongoClient
-    this.client = null
+    const config = require('../config/db.config.json').mongodb
+    if (config != null) {
+      this.url = this._createUrlByConfig(config)
+      this.mongo = require('mongodb').MongoClient
+      this.client = null
+      this.databaseName = config.name
+      this.collectionName = config.collection
+    }
   }
   /**
    * create new url to connect mongodb

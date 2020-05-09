@@ -2,6 +2,7 @@
   "mongodb":{
     "host": "localhost",
     "port": 27017,
-    "name": "trouper_db"
+    "name": "trouper",
+    "collection": "programs"
   }
 }
