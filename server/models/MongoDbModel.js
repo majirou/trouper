@@ -29,7 +29,11 @@ class MongoDbModel {
   async _connect(){
     try {
       if (this.url == null) throw new Error('connecting to:'.cyan + this.url);
-      this.client = await this.mongo.connect(this.url, { useNewUrlParser: true })
+      const connectOption = {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+      this.client = await this.mongo.connect(this.url, connectOption)
     } catch (err) {
       console.log(err.name.red, err.message.yellow);
     }
