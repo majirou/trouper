@@ -7,21 +7,25 @@ class ProgramController {
 
   // register to mongodb
   async register (url, schedule, actions) {
+    let result ;
     try {
       if (!this._validateUrl(url)) {
         throw new Error(`Validation Error Url: ${url}`)
       }
       if (!this._validateSchedule(schedule)) {
-        throw new Error(`Validation Error Schedule: ${schedule}`)
+        throw new Error('Validation Error Schedule')
       }
       if (!this._validateActions(actions)) {
         throw new Error(`Validation Error Actions: ${actions}`)
       }
 
-      this.db.addProgram()
+      const registeredId = await this.db.addProgram({url,schedule,actions})
+      result = true
     } catch(e) {
-      console.error(e);
+      console.error(e)
+      result = false
     }
+    return result
   }
 
   _validateUrl (url) {
