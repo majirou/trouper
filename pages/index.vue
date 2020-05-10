@@ -11,6 +11,7 @@
       template(slot="body")
         RegisterForm(
           @message = "setMessage"
+          @close = "hideRegisterModal"
         )
     Modal#message(
       v-if="messageText"

@@ -187,11 +187,9 @@ export default {
       }
     },
     setWarningMessage (message) {
-      console.log('setWarningMessage')
       this.$emit('message', 3, message)
     },
     setInformationMessage (message) {
-      console.log('setInformationMessage')
       this.$emit('message', 1, message)
     },
     registerTargetNode (element) {
@@ -232,9 +230,13 @@ export default {
         .post(this.registerApiUrl, postData)
         .then((res) => {
           if (res.status !== 200) {
-            throw new Error('error')
+            throw new Error('request error')
           }
-          console.log(res)
+          if (res.data == null || !res.data.result) {
+            throw new Error(`error: ${res.data.message}`)
+          }
+          this.$emit('message', 1, 'registered')
+          this.$emit('close')
         })
         .catch((err) => {
           this.setWarningMessage(err.message)
