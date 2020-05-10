@@ -47,13 +47,19 @@ async function start () {
 
 function init () {
   const ctrlPath = './controllers'
-  app.get(`${baseDir}programs/`, (req, res) => {
-    res.json([
-      { _id: 'a', name: 'name1' },
-      { _id: 'ab', name: 'name2' },
-      { _id: 'abc', name: 'name3' },
-      { _id: 'abcd', name: 'name4' }
-    ])
+  app.get(`${baseDir}programs/`, async (req, res) => {
+    try {
+      if (req.body == null) throw new Error('No Body')
+      const Program = require(`${ctrlPath}/ProgramController.js`)
+      const ctrl = new Program()
+      const searchResult = await ctrl.search(req.body)
+      if (!searchResult) {
+        throw new Error(`Search Error`)
+      }
+      res.json({result: searchResult})
+    } catch(e) {
+      res.json({result: false, message: e.message})
+    }
   })
 
   // register program
@@ -66,9 +72,9 @@ function init () {
       if (!registerResult) {
         throw new Error(`Validation Error`)
       }
-      res.send({})
+      res.json({result: true})
     } catch(e) {
-      res.status(400).send(e.message)
+      res.json({result: false, message: e.message})
     }
   })
 

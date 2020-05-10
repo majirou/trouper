@@ -47,8 +47,9 @@ class MongoDbModel {
   }
 
   async addProgram(param) {
-    param.created = new Date()
-    return this._insert(param)
+    const _p = (this.params == null) ? param : this.param
+    _p.created = new Date()
+    return await this._insert(_p)
   }
 
   async _insert(param) {
@@ -130,5 +131,45 @@ class MongoDbModel {
   setRegisterParameters(params){
     this.params = params
   }
+
+  /**
+   * search
+   */
+  validSearchParameters(){
+    let result ;
+    try {
+      // let valid = true
+      // if (!this._validateUrl(this.params.url)) {
+      //   valid = false
+      //   this.msg.push(`Validation Error @ Url: ${url}`)
+      // }
+      // if (!valid) {
+      //   throw new Error('Validation is failed.')
+      // }
+      result = true
+    } catch(e) {
+      result = false
+    }
+    return result
+  }
+  setSearchParameters(params){
+    this.params = params
+  }
+
+  async search(param) {
+    const _p = (this.params == null) ? param : this.param
+    return await this._search(_p)
+  }
+
+  async _search(param) {
+    if (this.client == null) {
+      await this._connect()
+    }
+    const collection = await this.client.db(this.databaseName).collection(this.collectionName)
+    const result = await collection.find().toArray()
+    await this.client.close()
+    return result
+  }
+
 }
 module.exports = MongoDbModel

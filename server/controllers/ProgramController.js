@@ -15,7 +15,8 @@ class ProgramController {
         throw new Error('Validation is failed.')
       }
 
-      const registeredId = await this.db.addProgram(params)
+      const registeredId = await this.db.addProgram()
+      console.log("registeredId:" + registeredId)
       result = true
     } catch(e) {
       result = false
@@ -23,5 +24,20 @@ class ProgramController {
     return result
   }
 
+  async search (params) {
+    let result ;
+    try {
+      this.db.setSearchParameters(params)
+
+      if (!this.db.validSearchParameters()) {
+        throw new Error('Search Parameter Validation is failed.')
+      }
+
+      result = await this.db.search()
+    } catch(e) {
+      result = false
+    }
+    return result
+  }
 }
 module.exports = ProgramController
