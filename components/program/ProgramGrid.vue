@@ -38,7 +38,19 @@ export default {
   },
   methods: {
     setTabulatorData (data) {
-      this.table.setData(data)
+      const _d = []
+      data.forEach((v) => {
+        _d.push({
+          _id: v._id,
+          name: v.schedule.name,
+          url: v.url,
+          date: v.schedule.date,
+          // dir:
+          interval: v.schedule.interval,
+          created: v.created
+        })
+      })
+      this.table.setData(_d)
     },
     initTabulator () {
       this.table = new Tabulator('#' + this.tableId, {
@@ -89,7 +101,9 @@ export default {
         { title: 'シナリオ名', field: 'name' },
         { title: 'URL', field: 'url' },
         { title: '次回予定日', field: 'date' },
-        { title: 'DIR', field: 'dir' }
+        { title: '間隔', field: 'interval' },
+        { title: 'DIR', field: 'dir' },
+        { title: '状況', field: 'status' }
       ]
 
       columns.forEach((v, i) => {
