@@ -47,7 +47,7 @@ class MongoDbModel {
   }
 
   async addProgram(param) {
-    const _p = (this.params == null) ? param : this.param
+    const _p = (this.params == null) ? param : this.params
     _p.created = new Date()
     return await this._insert(_p)
   }
