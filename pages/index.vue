@@ -2,7 +2,8 @@
   main
     MainGrid(
       :records="gridData"
-      @modal="showRegisterModal"
+      @register="showRegisterModal"
+      @delete="showDeleteModal"
     )
     Modal#register(
       v-if="visibleRegisterModal"
@@ -22,6 +23,20 @@
     )
       template(slot="body")
         p.alert(:class="" ) {{messageMode}} {{messageText}}
+    Modal#delete(
+      v-if="visibleDeleteModal"
+      @close="hideDeleteModal"
+      @cancel="hideDeleteModal"
+      @ok="hideDeleteModal"
+      :visibleFooter="true"
+    )
+      template(slot="body")
+        p.alert(:class="" ) 削除してよろしいですか？
+      // template(slot="body")
+        DeleteForm(
+          @message = "setMessage"
+          @close = "hideRegisterModal"
+        )
 </template>
 
 <script>
@@ -42,7 +57,9 @@ export default {
       // message modal
       visibleMessageModal: false,
       messageMode: 0, // 0:none , 1:info , 2:success, 3:warning , 4:danger
-      messageText: null
+      messageText: null,
+      // delete modal
+      visibleDeleteModal: false
     }
   },
   methods: {
@@ -59,7 +76,7 @@ export default {
           if (res.status !== 200) {
             throw new Error('error')
           }
-          this.gridData = res.data
+          this.gridData = res.data.result
         }).catch((err) => {
           // handle error
           console.log(err)
@@ -70,6 +87,12 @@ export default {
     },
     hideRegisterModal () {
       this.visibleRegisterModal = false
+    },
+    showDeleteModal () {
+      this.visibleDeleteModal = true
+    },
+    hideDeleteModal () {
+      this.visibleDeleteModal = false
     },
     setMessage (mode, text) {
       console.log('setMessage', mode, text)

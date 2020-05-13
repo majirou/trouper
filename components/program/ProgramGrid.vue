@@ -103,7 +103,15 @@ export default {
         { title: '次回予定日', field: 'date' },
         { title: '間隔', field: 'interval' },
         { title: 'DIR', field: 'dir' },
-        { title: '状況', field: 'status' }
+        { title: '状況', field: 'status' },
+        { formatter: () => '<span class="bg-danger text-white px-1 rounded"><i class="fas fa-trash-alt" ></i></span>',
+          width: 40,
+          align: 'center',
+          cellClick: (event, cell) => {
+            const id = cell.getData()._id
+            this.showDeleteModal(id)
+          }
+        }
       ]
 
       columns.forEach((v, i) => {
@@ -114,7 +122,10 @@ export default {
       return columns
     },
     showRegisterModal () {
-      this.$emit('modal')
+      this.$emit('register')
+    },
+    showDeleteModal (id) {
+      this.$emit('delete', id)
     }
   }
 }
