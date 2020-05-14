@@ -26,19 +26,23 @@
     Modal#delete(
       v-if="visibleDeleteModal"
       @close="hideDeleteModal"
-      @cancel="hideDeleteModal"
-      @ok="hideDeleteModal"
+      :visibleHeader="true"
       :visibleFooter="true"
       :visibleClose="false"
+      :mode="4"
       :width="`50%`"
     )
+      template(slot="header")
+        .p-0 削除の確認
       template(slot="body")
-        p.alert(:class="" ) 削除してよろしいですか？
-      // template(slot="body")
-        DeleteForm(
-          @message = "setMessage"
-          @close = "hideRegisterModal"
-        )
+        p.alert(:class="" )
+          b.h3 {{deleteTarget.name}}({{deleteTarget.url}}) <br>
+          | 削除してよろしいですか？
+      template(slot="footer")
+        .w-100.d-flex.justify-content-between
+          button.btn.btn-secondary(@click="hideDeleteModal") キャンセル
+          button.btn.btn-primary.mr-0.ml-auto(@click="hideDeleteModal")
+            slot(name="ok") OK
 </template>
 
 <script>
@@ -61,7 +65,8 @@ export default {
       messageMode: 0, // 0:none , 1:info , 2:success, 3:warning , 4:danger
       messageText: null,
       // delete modal
-      visibleDeleteModal: false
+      visibleDeleteModal: false,
+      deleteTarget: null
     }
   },
   methods: {
@@ -90,8 +95,9 @@ export default {
     hideRegisterModal () {
       this.visibleRegisterModal = false
     },
-    showDeleteModal () {
+    showDeleteModal (obj) {
       this.visibleDeleteModal = true
+      this.deleteTarget = obj
     },
     hideDeleteModal () {
       this.visibleDeleteModal = false
