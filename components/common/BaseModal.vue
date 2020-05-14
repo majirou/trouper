@@ -2,7 +2,7 @@
   transition(name="modal")
     .modal-mask(:style="{'z-index':zIndex}")
       .modal-wrapper
-        .modal-container
+        .modal-container(:style="{'width': width}")
           .modal-close(@click="closeAction")
             a.close-btn
           .modal-header.d-flex(v-if="visibleHeader")
@@ -21,6 +21,10 @@
 export default {
   name: 'BaseModal',
   props: {
+    width: {
+      type: String,
+      default: '100%'
+    },
     mode: {
       type: Number,
       default: 0

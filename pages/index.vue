@@ -29,6 +29,7 @@
       @cancel="hideDeleteModal"
       @ok="hideDeleteModal"
       :visibleFooter="true"
+      :width="`50%`"
     )
       template(slot="body")
         p.alert(:class="" ) 削除してよろしいですか？
