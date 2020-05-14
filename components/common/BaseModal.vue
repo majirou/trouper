@@ -3,7 +3,7 @@
     .modal-mask(:style="{'z-index':zIndex}")
       .modal-wrapper
         .modal-container(:style="{'width': width}")
-          .modal-close(@click="closeAction")
+          .modal-close(@click="closeAction" v-if="visibleClose")
             a.close-btn
           .modal-header.d-flex(v-if="visibleHeader")
             slot(name="header") default header
@@ -32,6 +32,10 @@ export default {
     zIndex: {
       type: Number,
       default: 1000
+    },
+    visibleClose: {
+      type: Boolean,
+      default: true
     },
     visibleHeader: {
       type: Boolean,

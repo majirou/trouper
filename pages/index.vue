@@ -29,6 +29,7 @@
       @cancel="hideDeleteModal"
       @ok="hideDeleteModal"
       :visibleFooter="true"
+      :visibleClose="false"
       :width="`50%`"
     )
       template(slot="body")
