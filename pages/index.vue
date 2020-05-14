@@ -47,7 +47,7 @@
       template(slot="footer")
         .w-100.d-flex.justify-content-between
           button.btn.btn-secondary(@click="hideDeleteModal") キャンセル
-          button.btn.btn-danger.mr-0.ml-auto(@click="hideDeleteModal")
+          button.btn.btn-danger.mr-0.ml-auto(@click="deleteRecord")
             slot(name="ok")
               font-awesome-icon(icon="trash").mr-2
               | DELETE
@@ -94,7 +94,26 @@ export default {
           this.gridData = res.data.result
         }).catch((err) => {
           // handle error
-          console.log(err)
+          console.error(err)
+        })
+    },
+    deleteRecord () {
+      const url = `/program/`
+      const params = {
+        target: this.deleteTarget
+      }
+
+      this.$axios
+        .delete(url, params)
+        .then((res) => {
+          console.log(res)
+          if (res.status !== 200) {
+            throw new Error('error')
+          }
+          this.getTableData()
+        }).catch((err) => {
+          // handle error
+          console.error(err)
         })
     },
     showRegisterModal () {
