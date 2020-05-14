@@ -108,8 +108,12 @@ export default {
           width: 40,
           align: 'center',
           cellClick: (event, cell) => {
-            const id = cell.getData()._id
-            this.showDeleteModal(id)
+            const _d = cell.getData()
+            this.showDeleteModal({
+              id: _d._id,
+              name: _d.name,
+              url: _d.url
+            })
           }
         }
       ]
@@ -124,8 +128,8 @@ export default {
     showRegisterModal () {
       this.$emit('register')
     },
-    showDeleteModal (id) {
-      this.$emit('delete', id)
+    showDeleteModal (obj) {
+      this.$emit('delete', obj)
     }
   }
 }
