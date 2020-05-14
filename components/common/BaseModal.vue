@@ -5,7 +5,7 @@
         .modal-container(:style="{'width': width}")
           .modal-close(@click="closeAction" v-if="visibleClose")
             a.close-btn
-          .modal-header.d-flex(v-if="visibleHeader")
+          .modal-header.d-flex(v-if="visibleHeader" :class="getHeaderClass()")
             slot(name="header") default header
           .modal-body
             slot(name="body") default body
@@ -25,6 +25,7 @@ export default {
       type: String,
       default: '100%'
     },
+    // 0:none , 1:info , 2:success, 3:warning , 4:danger
     mode: {
       type: Number,
       default: 0
@@ -46,6 +47,12 @@ export default {
       default: false
     }
   },
+  data () {
+    return {
+      baseColor: null,
+      textColor: null
+    }
+  },
   methods: {
     cancelAction () {
       this.$emit('cancel')
@@ -55,6 +62,32 @@ export default {
     },
     closeAction () {
       this.$emit('close')
+    },
+    getHeaderClass () {
+      return `bg-${this.baseColor} text-${this.textColor} h4`
+    }
+  },
+  mounted () {
+    // 0:none , 1:info , 2:success, 3:warning , 4:danger
+    switch (this.mode) {
+      case 1: // info
+        this.baseColor = 'info'
+        this.textColor = 'white'
+        break
+      case 2: // success
+        this.baseColor = 'success'
+        this.textColor = 'white'
+        break
+      case 3: // warning
+        this.baseColor = 'warning'
+        this.textColor = 'dark'
+        break
+      case 4: // danger
+        this.baseColor = 'danger'
+        this.textColor = 'white'
+        break
+      default:
+        break
     }
   }
 }

@@ -18,9 +18,15 @@
       v-if="messageText"
       @cancel="hideMessageModal"
       @ok="hideMessageModal"
+      :mode="messageMode"
       :zIndex=10000
+      :visibleHeader="true"
       :visibleFooter="true"
+      :visibleClose="false"
+      :width="`50%`"
     )
+      template(slot="header")
+        .p-0 {{messageMode}}
       template(slot="body")
         p.alert(:class="" ) {{messageMode}} {{messageText}}
     Modal#delete(
@@ -41,8 +47,10 @@
       template(slot="footer")
         .w-100.d-flex.justify-content-between
           button.btn.btn-secondary(@click="hideDeleteModal") キャンセル
-          button.btn.btn-primary.mr-0.ml-auto(@click="hideDeleteModal")
-            slot(name="ok") OK
+          button.btn.btn-danger.mr-0.ml-auto(@click="hideDeleteModal")
+            slot(name="ok")
+              font-awesome-icon(icon="trash").mr-2
+              | DELETE
 </template>
 
 <script>
