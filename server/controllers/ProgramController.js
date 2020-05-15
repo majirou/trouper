@@ -39,5 +39,21 @@ class ProgramController {
     }
     return result
   }
+  // delete from mongodb
+  async delete (id) {
+    let result ;
+    try {
+      // this.db.setDeleteParameters(id)
+      // if (!this.db.validRegisterParameters()) {
+      //   throw new Error('Validation is failed.')
+      // }
+      const result = await this.db.deleteProgramById(id)
+      console.log("delete:", id, result)
+      result = true
+    } catch(e) {
+      result = false
+    }
+    return result
+  }
 }
 module.exports = ProgramController

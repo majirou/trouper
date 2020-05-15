@@ -98,13 +98,10 @@ export default {
         })
     },
     deleteRecord () {
-      const url = `/program/`
-      const params = {
-        target: this.deleteTarget
-      }
+      const url = `/program/${this.deleteTarget.id}`
 
       this.$axios
-        .delete(url, params)
+        .delete(url)
         .then((res) => {
           console.log(res)
           if (res.status !== 200) {

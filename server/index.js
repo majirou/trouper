@@ -70,7 +70,24 @@ function init () {
       const ctrl = new Program()
       const registerResult = await ctrl.register(req.body)
       if (!registerResult) {
-        throw new Error(`Validation Error`)
+        throw new Error(`Register Error`)
+      }
+      res.json({result: true})
+    } catch(e) {
+      res.json({result: false, message: e.message})
+    }
+  })
+
+  // delete program
+  app.delete(`${baseDir}program/:id([a-zA-Z0-9]+)`, async (req, res) => {
+    try {
+      console.log(req.params)
+      if (req.params == null || req.params.id == null) throw new Error('Params is Undefined')
+      const Program = require(`${ctrlPath}/ProgramController.js`)
+      const ctrl = new Program()
+      const deleteResult = await ctrl.delete(req.params.id)
+      if (!deleteResult) {
+        throw new Error(`Delete Error`)
       }
       res.json({result: true})
     } catch(e) {

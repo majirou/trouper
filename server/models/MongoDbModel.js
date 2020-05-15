@@ -171,5 +171,25 @@ class MongoDbModel {
     return result
   }
 
+  async deleteProgramById(id){
+    const ObjectId = require('mongodb').ObjectID
+    return await this._deleteOne({ _id: ObjectId(id) })
+  }
+
+  async _deleteOne(param) {
+    if (this.client == null) {
+      await this._connect()
+    }
+    const collection = await this.client.db(this.databaseName).collection(this.collectionName)
+    const result = await collection.deleteOne(param)
+      .then( res => {
+        console.log(res.result)
+        result = (res.result.deletedCount === 1)
+      })
+      .catch(err => console.error(err))
+      .then(() => { if (this.client != null) this.client.close() })
+
+    return result
+  }
 }
 module.exports = MongoDbModel
