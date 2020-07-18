@@ -1,22 +1,16 @@
 <template lang="pug">
-  .card.flex-row.mt-1
+  .card.flex-row
     .card-header.border-bottom-0.border-right.py-1
-      span 登録要素
+      span Capturing Elements
     .card-body.p-1
       .d-flex
         .badge.badge-primary(v-for="(v,i) in elems")
           span {{v.tag}}
-        //
-          span TAG: {{v.tag}}
-          span ID: {{v.id}}
-          span CLASS: {{v.className}}
-          span NAME: {{v.name}}
-          span INDEX: {{v.index}}
 </template>
 
 <script>
 export default {
-  name: 'RegisteredElements',
+  name: 'CapturingElements',
   props: {
     'elems': {
       type: Array,

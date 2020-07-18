@@ -38,6 +38,9 @@ export default {
   },
   methods: {
     setTabulatorData (data) {
+      if (data == null) {
+        return null
+      }
       const _d = []
       data.forEach((v) => {
         _d.push({
@@ -58,13 +61,6 @@ export default {
         layout: 'fitDataFill',
         placeholder: 'No Data Set',
         columns: this.getColumns()
-        // // ajax
-        // ajaxURL: `${this.$apiUrl}/scenarios`,
-        // ajaxProgressiveLoad: 'scroll',
-        // ajaxProgressiveLoadDelay: 200,
-        // // ajaxFiltering: true,
-        // ajaxParams: null,
-        // paginationSize: 10
       })
     },
     calcHeight (unit = null) {
@@ -97,7 +93,7 @@ export default {
             // this.$router.push({ path: `/review/${ak}` })
           }
         },
-        { title: 'ID', field: '_id' },
+        { title: 'ID', field: '_id', visible: false },
         { title: 'シナリオ名', field: 'name' },
         { title: 'URL', field: 'url' },
         { title: '次回予定日', field: 'date' },
@@ -138,6 +134,8 @@ export default {
 <style lang="scss">
 .tbl-header{
   margin: 0.5em 0;
+  display: flex;
+  justify-content: flex-end;
 }
 .tbl-body{
   margin: 0.5em 0;

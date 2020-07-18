@@ -1,78 +1,71 @@
 <template lang="pug">
-  .container-fluid.py-3
-    .row(v-show="isStep(0)")
-      .col-12.mb-1
-        .input-group
-          input.form-control(
-            type="text"
-            placeholder="スクレイプ対象URL"
-            v-model="targetUrl"
-          )
-          .input-group-append
-            button.btn.btn-primary(@click="getTargetSite")
-              font-awesome-icon.mr-2(icon="file-download")
-              | 取得
-      .col-12.mb-1
-        iframe.w-100.border.border-info.rounded(
-          type  = "text/html"
-          :id   = "iframeId"
-          :src  = "iframeSource"
-          @load = "iframeLoaded"
-        )
-      .col-11.pr-0
-        ActiveElement(
-          :elem="activeElement"
-          @add="registerTargetNode"
-          @parent="selectParentNode"
-          @clear=""
-          :disable="!isIframeLoaded"
-        )
-        RegisteredElements(
-          :elems="registeredElementList"
-        )
-      .col-1.pl-2
-        button.btn.btn-warning.h-100.w-100.px-1(@click="nextStep")
-          font-awesome-icon.mr-2(icon="chevron-circle-down")
-          | 次へ
-    .row(v-show="isStep(1)")
-      .col-11.mb-3
-      .col-1.mb-3
-        button.btn.btn-sm.btn-secondary.h-100.w-100(@click="backStep")
-          font-awesome-icon.mr-2(icon="chevron-circle-up")
-          | 戻る
-      .col-12.mb-1
-        .input-group
-          .input-group-prepend
-            span.input-group-text(style="padding:0 1.25em;") 対象URL
-          input.form-control(
-            type="text"
-            :value="targetUrl"
-          )
-      .col-12
-        RegisteredElements(
-          :elems="registeredElementList"
-        )
-      .col-12
-        ScheduleForm(
-          :page-title="iframeTitle"
-          :schedule-data="scheduleData"
-        )
-      .col-11
-      .col-12.text-center.mt-3
-        button.btn.btn-lg.btn-warning.h-100(@click="register")
-          font-awesome-icon.mr-2(icon="save")
-          | 上記内容で登録する
+  .container-fluid.pt-2.pb-1
+    .row
+      .col-11.pr-2
+        .row
+          .col-12.mb-1
+            .input-group
+              input.form-control(
+                type="text"
+                placeholder="Target URL"
+                v-model="targetUrl"
+              )
+              .input-group-append
+                button.btn.btn-primary(@click="getTargetSite")
+                  font-awesome-icon.mr-2(icon="file-download")
+                  | GET
+          .col-12.mb-1
+            iframe.w-100.border.border-info.rounded(
+              type  = "text/html"
+              :id   = "iframeId"
+              :src  = "iframeSource"
+              @load = "iframeLoaded"
+            )
+          .col-12
+            .row
+              .col-11
+                .row
+                  .col-12
+                    ActiveElement(
+                      :element="activeElement"
+                      @add="registerTargetNode"
+                      @parent="selectParentNode"
+                      @clear="clearNode"
+                      :disable="!isIframeLoaded"
+                    )
+                  .col-12
+                    ActionForm.mt-1.w-auto(
+                      :element="activeElement"
+                      @change="setTemporaryActionSequence"
+                      :disbled="!iframeLoaded"
+                    )
+              .col-1.pl-0
+                button.btn.btn-primary.h-100.w-100.px-1(
+                  @click="addActionSequence"
+                  :disabled="!temporaryActionSequence"
+                )
+                  font-awesome-icon.mr-2(icon="plus")
+                  | ADD
+      .col-1
+        .row.rounded-0.h-100
+          .col-12.pl-0
+            ActionSequence(
+              :sequence-list = "actionSequence"
+            )
 </template>
 
 <script>
-import ActiveElement from '@/components/program/ActiveElement.vue'
-import RegisteredElements from '@/components/program/RegisteredElements.vue'
-import ScheduleForm from '@/components/program/ScheduleForm.vue'
+import ActionForm from '@/components/scenario/ActionForm.vue'
+import ActiveElement from '@/components/scenario/ActiveElement.vue'
+import ActionSequence from '@/components/scenario/ActionSequence.vue'
+
+// import ScheduleForm from '@/components/scenario/ScheduleForm.vue'
 
 export default {
-  name: 'ProgramForm',
+  name: 'SceneForm',
   components: {
-    ActiveElement, RegisteredElements, ScheduleForm
+    // ActiveElement, RegisteredElements, ScheduleForm
+    ActionForm, ActiveElement, ActionSequence
   },
   data () {
     return {
@@ -98,7 +91,8 @@ export default {
       isIframeLoaded: false,
       scrapingApiUrl: '/temporary',
       registerApiUrl: '/program',
-      step: 0
+      temporaryActionSequence: null,
+      actionSequence: []
     }
   },
   mounted () {
@@ -142,7 +136,7 @@ export default {
         }
 
         this.isIframeLoaded = false
-        this.$lock('Getting HTML...')
+        this.$lock('Scraping HTML...')
         const targetUrl = `${this.scrapingApiUrl}/?url=${this.targetUrl}`
         console.log('targetUrl', this.scrapingApiUrl, this.targetUrl)
         this.$axios.get(targetUrl)
@@ -210,14 +204,9 @@ export default {
     selectParentNode (element) {
       this._postMessage({ type: 'parent' }, '*')
     },
-    isStep (num) {
-      return this.step === parseInt(num)
-    },
-    backStep () {
-      this.step--
-    },
-    nextStep () {
-      this.step++
+    clearNode (element) {
+      this.temporaryActionSequence = null
+      this._postMessage({ type: 'clear' }, '*')
     },
     register () {
       const postData = {
@@ -245,6 +234,13 @@ export default {
         .finally(() => {
           this.$unlock()
         })
+    },
+    setTemporaryActionSequence (value) {
+      this.temporaryActionSequence = value
+    },
+    addActionSequence (event) {
+      const seq = Object.assign(this.temporaryActionSequence, { element: this.activeElement })
+      this.actionSequence.push(seq)
     }
   }
 }
@@ -253,7 +249,7 @@ export default {
 <style lang="scss" scoped>
   .modal-container {
     iframe{
-      height: 70vh;
+      height: 65vh;
     }
   }
   .active-element li {
