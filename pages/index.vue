@@ -5,15 +5,6 @@
       @register="showRegisterModal"
       @delete="showDeleteModal"
     )
-    Modal#register(
-      v-if="visibleRegisterModal"
-      @close="hideRegisterModal"
-    )
-      template(slot="body")
-        RegisterForm(
-          @message = "setMessage"
-          @close = "hideRegisterModal"
-        )
     Modal#message(
       v-if="messageText"
       @cancel="hideMessageModal"
@@ -29,6 +20,24 @@
         .p-0 {{messageMode}}
       template(slot="body")
         p.alert(:class="" ) {{messageMode}} {{messageText}}
+    Modal#register(
+      v-if="visibleRegisterModal"
+      @close="hideRegisterModal"
+      :visibleFooter="true"
+      :containerStyle="{padding: '0.125em 0',width: '98%',margin:'1%'}"
+    )
+      template(slot="body")
+        ScenarioEditor(
+          @message = "setMessage"
+          @close = "hideRegisterModal"
+        )
+      template(slot="footer")
+        .w-100.d-flex.justify-content-between
+          button.btn.btn-secondary(@click="hideRegisterModal") CANCEL
+          button.btn.btn-warning.mr-0.ml-auto(@click="registerScenario")
+            slot(name="ok")
+              font-awesome-icon(icon="save").mr-2
+              | REGISTER
     Modal#delete(
       v-if="visibleDeleteModal"
       @close="hideDeleteModal"
@@ -54,15 +63,16 @@
 </template>
 
 <script>
-import MainGrid from '~/components/program/ProgramGrid'
+import MainGrid from '~/components/scenario/ScenarioGrid'
 import Modal from '~/components/common/BaseModal'
-import RegisterForm from '~/components/program/ProgramForm'
+import ScenarioEditor from '~/components/scenario/ScenarioEditor'
 
 export default {
+  name: 'Scenario',
   components: {
     MainGrid,
     Modal,
-    RegisterForm
+    ScenarioEditor
   },
   data () {
     return {
@@ -91,7 +101,7 @@ export default {
           if (res.status !== 200) {
             throw new Error('error')
           }
-          this.gridData = res.data.result
+          this.gridData = Array.isArray(res.data.result) ? res.data.result : []
         }).catch((err) => {
           // handle error
           console.error(err)
@@ -127,7 +137,6 @@ export default {
       this.visibleDeleteModal = false
     },
     setMessage (mode, text) {
-      console.log('setMessage', mode, text)
       this.messageMode = mode // 0:none , 1:info , 2:success, 3:warning , 4:danger
       this.messageText = text
     },
@@ -137,6 +146,9 @@ export default {
     },
     hideMessageModal () {
       this.clearMessage()
+    },
+    registerScenario () {
+
     }
   }
 }
