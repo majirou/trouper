@@ -47,7 +47,8 @@ export default {
         { id: 1, text: 'input' },
         { id: 2, text: 'click' },
         { id: 3, text: 'submit' },
-        { id: 4, text: 'capture' }
+        { id: 4, text: 'capture text' },
+        { id: 5, text: 'capture page' }
       ],
       actionValue: null,
       inputValue: null,
@@ -89,7 +90,7 @@ export default {
       this.$emit('change', v)
     },
     isDisabledAction (id) {
-      return (id === 4) ? this.disabled : !this.isActiveElement
+      return (id === 5) ? this.disabled : !this.isActiveElement
     }
   }
 }
