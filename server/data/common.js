@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // clear colored element at right clicked
   document.oncontextmenu = () => {
-    clearActiveElement()
+    // clearActiveElement()
     return false // not display context menu
   }
 
@@ -47,11 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     switch( event.data.type ) {
       case 'init':
         document.body.addEventListener(
-          'click',
+          'contextmenu',
           event => {
             clearActiveElement()
             event.target.classList.add(activeClass)
-            postMessageWithTargetSelector('click', event.target )
+            postMessageWithTargetSelector('activate', event.target )
           },
           true
         )
@@ -77,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'activate':
         // remove activate class on already activated element
         clearActiveElement()
-        //
         const data = event.data.data
         const query = data.tag
                     + (data.id) ? `#${data.id}` : ''
@@ -96,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearActiveElement()
             parent.classList.add(activeClass)
             // to get selector the parent node
-            postMessageWithTargetSelector('click', parent)
+            postMessageWithTargetSelector('activate', parent)
         }
         break;
       case 'title':

@@ -106,7 +106,7 @@ export default {
               // 既存のアクティブタブを解除
               this.activeElement = Object.assign({}, json.target)
               break
-            case 'click':
+            case 'activate':
             case 'parent':
               this.activeElement = Object.assign({}, json.target)
               break
