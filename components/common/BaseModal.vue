@@ -2,14 +2,16 @@
   transition(name="modal")
     .modal-mask(:style="{'z-index':zIndex}")
       .modal-wrapper
-        .modal-container(:style="{'width': width}")
-          .modal-close(@click="closeAction" v-if="visibleClose")
+        .modal-container(
+          :style="containerStyle"
+        )
+          .modal-close(@click.stop="closeAction" v-if="visibleClose")
             a.close-btn
           .modal-header.d-flex(v-if="visibleHeader" :class="getHeaderClass()")
             slot(name="header") default header
           .modal-body
             slot(name="body") default body
-          .modal-footer(v-if="visibleFooter")
+          .modal-footer(v-if="visibleFooter" :style="footerStyle")
             slot(name="footer")
               .d-flex
                 button.btn.btn-secondary(@click="cancelAction") キャンセル
@@ -21,9 +23,17 @@
 export default {
   name: 'BaseModal',
   props: {
-    width: {
-      type: String,
-      default: '100%'
+    containerStyle: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
+    footerStyle: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     },
     // 0:none , 1:info , 2:success, 3:warning , 4:danger
     mode: {
@@ -53,20 +63,6 @@ export default {
       textColor: null
     }
   },
-  methods: {
-    cancelAction () {
-      this.$emit('cancel')
-    },
-    okAction () {
-      this.$emit('ok')
-    },
-    closeAction () {
-      this.$emit('close')
-    },
-    getHeaderClass () {
-      return `bg-${this.baseColor} text-${this.textColor} h4`
-    }
-  },
   mounted () {
     // 0:none , 1:info , 2:success, 3:warning , 4:danger
     switch (this.mode) {
@@ -88,6 +84,20 @@ export default {
         break
       default:
         break
+    }
+  },
+  methods: {
+    cancelAction () {
+      this.$emit('cancel')
+    },
+    okAction () {
+      this.$emit('ok')
+    },
+    closeAction () {
+      this.$emit('close')
+    },
+    getHeaderClass () {
+      return `bg-${this.baseColor} text-${this.textColor} h4`
     }
   }
 }
@@ -111,7 +121,7 @@ export default {
   .modal-wrapper {
     display: table-cell;
     vertical-align: middle;
-    padding: 0 1em;
+    // padding: 0 1em;
   }
   .modal-container {
     margin: .5em auto;
@@ -127,7 +137,7 @@ export default {
       width: 33px;
       height: 33px;
       background-color: #eee;
-      z-index: 5000;
+      // z-index: 5000;
       opacity: 0.5;
 
       &:hover {
