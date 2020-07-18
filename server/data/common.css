@@ -1,9 +1,12 @@
 
 /* color clicked element in iframe*/
 .iframe-active{
-  transform: scaleX(0.95) scaleY(0.97) !important;
-  position:relative;
-  border: 2px dashed #F00;
+  transform: scaleX(0.97) scaleY(0.97) !important;
+  position: relative;
+  /*border: 2px dashed #F00;*/
+  outline: solid 2px #F00;
+  padding: inherit !important;
+  margin: inherit !important;
 }
 .iframe-active:before {
   content: "";
@@ -12,12 +15,13 @@
   width: 100%;
   height: 100%;
   background-image: none !important;
-  background-color: #F009 !important;
-  border: 3px dashed green !important;
+  background-color: #F006 !important;
+  /* border: 3px dashed green !important; */
+  outline: dashed 2px #0F0;
   opacity:0.75;
   left: 0;
 }
 
 a{
-  pointer-events: none;
+  pointer-events: none !important;
 }
