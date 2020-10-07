@@ -8,10 +8,11 @@
 </template>
 
 <script>
+import Tabulator from 'tabulator-tables' // import Tabulator library
 import { dom } from '@fortawesome/fontawesome-svg-core'
 dom.watch()
 
-const Tabulator = require('tabulator-tables')
+// const Tabulator = require('tabulator-tables')
 
 export default {
   name: 'ReviewGrid',

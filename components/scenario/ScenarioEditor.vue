@@ -7,9 +7,12 @@
           button.btn.btn-sm.btn-primary(@click="showSceneModal")
             font-awesome-icon(icon="plus")
       .col-12.scenes
-        .card-deck
+        .card-deck.h-100
           .card(v-for="(v,i) in scenarioData.scenes")
-            div {{v}}
+            .card-header {{v.url}}
+            .card-body
+              div {{v.dir}}
+              div Actions: {{v.actions.length}}
       .col-12.col-md-4
         label Scenario Title:
         input.border-primary.form-control(
@@ -34,42 +37,20 @@
         input.border-primary.form-control(
           type="email" v-model="scenarioData.mail"
         )
-    Modal#scene(
+    SceneModal(
       v-if="visibleSceneModal"
-      @cancel="hideSceneModal"
       @close="hideSceneModal"
-      @ok="hideSceneModal"
-      :visibleClose="false"
-      :visibleFooter="true"
-      :containerStyle="containerStyle"
-      :footerStyle="footerStyle"
-      :zIndex=2000
+      @register="registerScene"
     )
-      template(slot="body")
-        RegisterForm(
-          @message = "setMessage"
-          @close = "hideRegisterModal"
-        )
-      template(slot="footer")
-        .w-100.d-flex.justify-content-between
-          button.btn.btn-secondary(@click="hideSceneModal") CLOSE
-          button.btn.btn-warning.mr-0.ml-auto(
-            @click="register"
-          )
-            slot(name="ok")
-              font-awesome-icon(icon="save").mr-2
-              | REGISTER
 </template>
 
 <script>
-import Modal from '~/components/common/BaseModal'
-import RegisterForm from '~/components/scenario/SceneForm'
+import SceneModal from '~/components/scenario/SceneModal.vue'
 
 export default {
   name: 'ScenarioEditor',
   components: {
-    Modal,
-    RegisterForm
+    SceneModal
   },
   props: {
     scenarioData: {
@@ -92,18 +73,8 @@ export default {
         { text: 'WEEK', value: 1 },
         { text: 'MONTH', value: 2 }
       ],
-      visibleSceneModal: false,
       visibleRegisterModal: false,
-      containerStyle: {
-        width: '100vw',
-        height: '100vh',
-        margin: 0,
-        'border-radius': 0
-      },
-      footerStyle: {
-        'padding-top': '0.125em',
-        'padding-bottom': '0.125em'
-      }
+      visibleSceneModal: false
     }
   },
   watch: {
@@ -126,12 +97,12 @@ export default {
     hideRegisterModal () {
       this.visibleRegisterModal = false
     },
-    setMessage (a, b, c, d) {
-      console.log(a, b, c, d)
-      // this.$emit('message', 3, message)
+    setMessage (mode, text) {
+      this.$emit('message', mode, text)
     },
-    register () {
-
+    registerScene (sceneData) {
+      this.scenarioData.scenes.push(sceneData)
+      this.hideSceneModal()
     }
   }
 }
@@ -143,5 +114,27 @@ export default {
   border-top: 1px solid var(--primary);
   border-bottom: 1px solid var(--primary);
   margin: 0.5em 0;
+  padding: 0.5em;
+
+  .card-header{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  @media (min-width: 576px){
+    .card{
+      width: 30vw;
+      max-width: 30vw;
+      min-width: 30vw;
+      font-size: 0.9em;
+    }
+  }
+  @media (min-width: 992px){
+    .card{
+      width: 20vw;
+      max-width: 20vw;
+      min-width: 20vw;
+    }
+  }
 }
 </style>

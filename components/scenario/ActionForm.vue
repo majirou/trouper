@@ -1,9 +1,9 @@
 <template lang="pug">
   .card.flex-row
-    .card-header.border-bottom-0.border-right.py-1
+    .card-header.border-bottom-0.border-right.px-2.py-1
       span Actions
     .card-body.p-1.d-flex
-      select.w-25.mr-3(
+      select.mr-2(
         class="form-control form-control-sm"
         v-model="actionValue"
         @change="emitActionValue"
@@ -14,8 +14,8 @@
           :value="v.id"
           :key="i"
           :disabled="isDisabledAction(v.id)"
-        ) {{v.id}}) {{v.text}}
-      input.form-control.form-control-sm.w-75(
+        ) {{v.text}}
+      input.form-control.form-control-sm(
         v-model="inputValue"
         v-if="actionValue === 1"
         @change="emitActionValue"
@@ -47,8 +47,7 @@ export default {
         { id: 1, text: 'input' },
         { id: 2, text: 'click' },
         { id: 3, text: 'submit' },
-        { id: 4, text: 'capture text' },
-        { id: 5, text: 'capture page' }
+        { id: 4, text: 'capture text' }
       ],
       actionValue: null,
       inputValue: null,
@@ -100,5 +99,9 @@ export default {
 option:disabled {
   background-color: #999;
   color: #FFF;
+}
+.card-header {
+  width: 6em;
+  text-align: center;
 }
 </style>

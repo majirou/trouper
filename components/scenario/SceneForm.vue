@@ -1,14 +1,14 @@
 <template lang="pug">
   .container-fluid.pt-2.pb-1
     .row
-      .col-11.pr-2
+      .col-12
         .row
           .col-12.mb-1
             .input-group
               input.form-control(
                 type="text"
                 placeholder="Target URL"
-                v-model="targetUrl"
+                v-model="sceneData.url"
               )
               .input-group-append
                 button.btn.btn-primary(@click="getTargetSite")
@@ -21,51 +21,37 @@
               :src  = "iframeSource"
               @load = "iframeLoaded"
             )
-          .col-12
-            .row
-              .col-11
-                .row
-                  .col-12
-                    ActiveElement(
-                      :element="activeElement"
-                      @add="registerTargetNode"
-                      @parent="selectParentNode"
-                      @clear="clearNode"
-                      :disable="!isIframeLoaded"
-                    )
-                  .col-12
-                    ActionForm.mt-1.w-auto(
-                      :element="activeElement"
-                      @change="setTemporaryActionSequence"
-                      :disbled="!iframeLoaded"
-                    )
-              .col-1.pl-0
-                button.btn.btn-primary.h-100.w-100.px-1(
-                  @click="addActionSequence"
-                  :disabled="!temporaryActionSequence"
-                )
-                  font-awesome-icon.mr-2(icon="plus")
-                  | ADD
-      .col-1
-        .row.rounded-0.h-100
-          .col-12.pl-0
-            ActionSequence(
-              :sequence-list = "actionSequence"
-            )
+      .col-12
+        ActionSequence(
+          :sequence-list = "sceneData.actions"
+        )
+    TargetContextMenu(
+      :pos-x = "contextPosX",
+      :pos-y = "contextPosY",
+      :base-id = "iframeId"
+      :active-element = "activeElement"
+      @parent="selectParentNode"
+      @clear="clearNode"
+      @temporary="setTemporaryActionSequence"
+      @add="addActionSequence"
+    )
 </template>
 
 <script>
-import ActionForm from '@/components/scenario/ActionForm.vue'
-import ActiveElement from '@/components/scenario/ActiveElement.vue'
+import Modal from '~/components/common/BaseModal.vue'
 import ActionSequence from '@/components/scenario/ActionSequence.vue'
-
-// import ScheduleForm from '@/components/scenario/ScheduleForm.vue'
+import TargetContextMenu from '~/components/scenario/TargetContextMenu.vue'
 
 export default {
   name: 'SceneForm',
   components: {
-    // ActiveElement, RegisteredElements, ScheduleForm
-    ActionForm, ActiveElement, ActionSequence
+    Modal, TargetContextMenu, ActionSequence
+  },
+  props: {
+    sceneData: {
+      type: Object,
+      default: () => {}
+    }
   },
   data () {
     return {
@@ -77,22 +63,16 @@ export default {
         index: null
       },
       registeredElementList: [],
-      scheduleData: {
-        name: null,
-        date: null,
-        interval: 1,
-        notification: [1],
-        mail: null
-      },
-      targetUrl: null,
       iframeId: 'iframeId',
       iframeTitle: null,
       iframeSource: null,
       isIframeLoaded: false,
       scrapingApiUrl: '/temporary',
-      registerApiUrl: '/program',
       temporaryActionSequence: null,
-      actionSequence: []
+      // target modal
+      visibleActionModal: false,
+      contextPosX: 0,
+      contextPosY: 0
     }
   },
   mounted () {
@@ -113,6 +93,10 @@ export default {
             case 'title':
               this.iframeTitle = json.data
               break
+            case 'context':
+              this.contextPosX = parseInt(json.target.x)
+              this.contextPosY = parseInt(json.target.y)
+              break
             default:
               console.log(event)
               break
@@ -128,17 +112,16 @@ export default {
       try {
         const reg = new RegExp("((https?)(://[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+))")
 
-        if (this.targetUrl == null) {
+        if (this.sceneData.url == null) {
           throw new Error('Input URL')
         }
-        if (!this.targetUrl.match(reg)) {
+        if (!this.sceneData.url.match(reg)) {
           throw new Error('Begin the URL with http or https')
         }
 
         this.isIframeLoaded = false
         this.$lock('Scraping HTML...')
-        const targetUrl = `${this.scrapingApiUrl}/?url=${this.targetUrl}`
-        console.log('targetUrl', this.scrapingApiUrl, this.targetUrl)
+        const targetUrl = `${this.scrapingApiUrl}/?url=${this.sceneData.url}`
         this.$axios.get(targetUrl)
           .then((res) => {
             if (res.status !== 200) {
@@ -146,6 +129,7 @@ export default {
             }
             console.log(res)
             this.iframeSource = `/data/temporary/${res.data.result.dirName}/`
+            this.sceneData.dir = res.data.result.dirName
             this.isIframeLoaded = true
             this.$unlock()
           })
@@ -170,6 +154,7 @@ export default {
         throw new Error('iframe content is empty')
       }
       // postMessageにて、iframeとのやりとりを実現する
+      console.log(messageObject, targetOrigin)
       contentWindow.postMessage(messageObject, targetOrigin)
     },
     iframeLoaded () {
@@ -186,7 +171,7 @@ export default {
     setInformationMessage (message) {
       this.$emit('message', 1, message)
     },
-    registerTargetNode (element) {
+    addTargetNode (element) {
       // check the element is already registered
       const findIndex = this.registeredElementList.findIndex((v) => {
         return (
@@ -205,42 +190,24 @@ export default {
       this._postMessage({ type: 'parent' }, '*')
     },
     clearNode (element) {
+      this.activeElement = Object.assign({
+        tag: null,
+        id: null,
+        className: null,
+        name: null,
+        index: null
+      }, {})
       this.temporaryActionSequence = null
       this._postMessage({ type: 'clear' }, '*')
-    },
-    register () {
-      const postData = {
-        url: this.targetUrl,
-        schedule: this.scheduleData,
-        elements: this.registeredElementList
-      }
-      this.$lock(`登録中...`)
-      this.$axios
-        .post(this.registerApiUrl, postData)
-        .then((res) => {
-          if (res.status !== 200) {
-            throw new Error('request error')
-          }
-          if (res.data == null || !res.data.result) {
-            throw new Error(`error: ${res.data.message}`)
-          }
-          this.$emit('message', 1, 'registered')
-          this.$emit('close')
-        })
-        .catch((err) => {
-          this.setWarningMessage(err.message)
-          console.error(err)
-        })
-        .finally(() => {
-          this.$unlock()
-        })
     },
     setTemporaryActionSequence (value) {
       this.temporaryActionSequence = value
     },
     addActionSequence (event) {
-      const seq = Object.assign(this.temporaryActionSequence, { element: this.activeElement })
-      this.actionSequence.push(seq)
+      if (this.temporaryActionSequence != null) {
+        const seq = Object.assign(this.temporaryActionSequence, { element: this.activeElement })
+        this.sceneData.actions.push(seq)
+      }
     }
   }
 }

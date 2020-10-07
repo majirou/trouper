@@ -1,41 +1,32 @@
 <template lang="pug">
-  .card.flex-row
-    .card-header.border-bottom-0.border-right.py-1.text-center
-      span Target
-    .card-body.p-1.overflow-auto
-      .d-flex
-        .capsel
-          .l TAG
-          .r {{element.tag}}
-        .capsel
-          .l ID
-          .r {{element.id}}
-        .capsel
-          .l CLASS
-          .r {{element.className}}
-        .capsel
-          .l NAME
-          .r {{element.name}}
-        .capsel
-          .l INDEX
-          .r {{element.index}}
-    .card-footer.border-top-0.border-left.py-1
-      .d-flex
-        button.btn.btn-sm.btn-primary.py-0.px-1.align-baseline.mr-2(
-          @click="parent"
-          :disabled="disable"
-        ) PARENT
-        button.btn.btn-sm.btn-primary.py-0.px-1.align-baseline(
-          @click="clear"
-          :disabled="disable"
-        ) CLEAR
+  div
+    .card.flex-row.my-2
+      .card-header.border-bottom-0.border-right.py-1.text-center
+        span Target
+      .card-body.p-1.overflow-auto
+        .d-flex.flex-column
+          .capsel
+            .l TAG
+            .r {{element.tag}}
+          .capsel
+            .l ID
+            .r {{element.id}}
+          .capsel
+            .l CLASS
+            .r {{element.className}}
+          .capsel
+            .l NAME
+            .r {{element.name}}
+          .capsel
+            .l INDEX
+            .r {{element.index}}
 </template>
 
 <script>
 export default {
   name: 'ActiveElement',
   props: {
-    'element': {
+    element: {
       type: Object,
       default: () => {
         return {
@@ -46,31 +37,18 @@ export default {
           index: null
         }
       }
-    },
-    'disable': {
-      type: Boolean,
-      default: true
-    }
-  },
-  mounted () {
-  },
-  methods: {
-    parent () {
-      this.$emit('parent', this.element)
-    },
-    clear () {
-      Object.keys(this.element).forEach((key) => {
-        this.element[key] = null
-      })
-      this.$emit('clear')
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.card-header {
+  width: 6em;
+  text-align: center;
+}
 .capsel{
-  margin-right: 0.5em;
+  margin-bottom: 0.25em;
   display: flex;
   .l{
     border-top-left-radius: 0.25rem;
@@ -79,6 +57,8 @@ export default {
     color: #31708f;
     background-color: #d9edf7;
     border: 1px solid #31708f;
+    width: 4em;
+    text-align: center;
   }
   .r{
     background-color: #FFF;
@@ -87,9 +67,9 @@ export default {
     padding: 0 0.25em;
     border: 1px solid var(--dark);
     border-left: none;
-    overflow: hidden;
+    overflow: scroll;
     white-space: nowrap;
-    text-overflow: ellipsis;
+    width: 10em;
   }
 }
 </style>
