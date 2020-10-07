@@ -4,15 +4,16 @@
       .col-12
         .d-flex.justify-content-between
           label Scenes:
-          button.btn.btn-sm.btn-primary(@click="showSceneModal")
-            font-awesome-icon(icon="plus")
       .col-12.scenes
-        .card-deck.h-100
+        .card-deck.h-100.mx-0
           .card(v-for="(v,i) in scenarioData.scenes")
             .card-header {{v.url}}
             .card-body
               div {{v.dir}}
               div Actions: {{v.actions.length}}
+          button.btn.btn-outline-primary(@click="showSceneModal")
+            font-awesome-icon(icon="plus")
+
       .col-12.col-md-4
         label Scenario Title:
         input.border-primary.form-control(
@@ -115,6 +116,14 @@ export default {
   border-bottom: 1px solid var(--primary);
   margin: 0.5em 0;
   padding: 0.5em;
+  .btn{
+    margin-right: 15px;
+    margin-left: 15px;
+    height: 4em;
+    width: 4em;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
 
   .card-header{
     overflow: hidden;
