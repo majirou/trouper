@@ -31,15 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // clear colored element at right clicked
-  document.oncontextmenu = () => {
-    // clearActiveElement()
+  document.oncontextmenu = (event) => {
     return false // not display context menu
   }
 
   window.addEventListener('message', event => {
-    const postMessageWithTargetSelector = (type, target) => {
+    const _postMessage = (type, target, flag = true) => {
       event.source.postMessage(
-        { type, target: createTarget(target) }, event.origin
+        { type, target: (flag) ? createTarget(target) : target }, event.origin
       )
     }
 
@@ -51,7 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
           event => {
             clearActiveElement()
             event.target.classList.add(activeClass)
-            postMessageWithTargetSelector('activate', event.target )
+            _postMessage('activate', event.target )
+            // for contextmenu
+            console.log(event)
+            _postMessage(
+              'context',
+              // { x: '' + event.screenX, y: '' + event.screenY},
+              { x: '' + event.clientX, y: '' + event.clientY},
+              false
+            )
           },
           true
         )
@@ -71,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elem = document.body.getElementsByClassName(activeClass)
         if( elem.length === 1){
           window.scrollTo(0, elem[0].getBoundingClientRect().top)
-          postMessageWithTargetSelector('get', elem[0] )
+          _postMessage('get', elem[0] )
         }
         break;
       case 'activate':
@@ -89,13 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'parent':
         elem = document.body.getElementsByClassName(activeClass)
         if (elem.length === 1) {
-            // add active class on parent node
-            const parent = elem[0].parentNode
-            // then clear active element and add active class to the paranet node
-            clearActiveElement()
-            parent.classList.add(activeClass)
-            // to get selector the parent node
-            postMessageWithTargetSelector('activate', parent)
+          // add active class on parent node
+          const parent = elem[0].parentNode
+          // then clear active element and add active class to the paranet node
+          clearActiveElement()
+          parent.classList.add(activeClass)
+          // to get selector the parent node
+          _postMessage('activate', parent)
         }
         break;
       case 'title':
