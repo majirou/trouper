@@ -94,7 +94,9 @@ export default {
       messageText: null,
       // delete modal
       visibleDeleteModal: false,
-      deleteTarget: null
+      deleteTarget: null,
+      // url
+      registerApiUrl: '/scenes'
     }
   },
   methods: {
@@ -158,7 +160,29 @@ export default {
       this.clearMessage()
     },
     registerScenario () {
-
+      const postData = {
+        scenario: this.scenarioData
+      }
+      this.$lock(`登録中...`)
+      this.$axios
+        .post(this.registerApiUrl, postData)
+        .then((res) => {
+          if (res.status !== 200) {
+            throw new Error('request error')
+          }
+          if (res.data == null || !res.data.result) {
+            throw new Error(`error: ${res.data.message}`)
+          }
+          this.$emit('message', 1, 'registered')
+          this.$emit('close')
+        })
+        .catch((err) => {
+          this.setWarningMessage(err.message)
+          console.error(err)
+        })
+        .finally(() => {
+          this.$unlock()
+        })
     }
   }
 }
