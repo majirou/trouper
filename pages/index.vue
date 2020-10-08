@@ -14,12 +14,14 @@
       :visibleHeader="true"
       :visibleFooter="true"
       :visibleClose="false"
-      :width="`50%`"
+      :containerStyle="{width: '70%'}"
     )
       template(slot="header")
         .p-0 {{messageMode}}
       template(slot="body")
-        p.alert(:class="" ) {{messageMode}} {{messageText}}
+        p.alert(:class="" ) {{messageText}}
+      template(slot="footer")
+        button.btn.btn-secondary(@click="hideMessageModal") CLOSE
     Modal#register(
       v-if="visibleRegisterModal"
       @close="hideRegisterModal"
@@ -28,6 +30,7 @@
     )
       template(slot="body")
         ScenarioEditor(
+          :scenario="scenarioData"
           @message = "setMessage"
           @close = "hideRegisterModal"
         )
@@ -77,6 +80,13 @@ export default {
   data () {
     return {
       gridData: this.getTableData(),
+      scenarioData: {
+        title: null,
+        date: null,
+        mail: null,
+        interval: 1,
+        scenes: []
+      },
       visibleRegisterModal: false,
       // message modal
       visibleMessageModal: false,

@@ -6,7 +6,7 @@
           label Scenes:
       .col-12.scenes
         .card-deck.h-100.mx-0
-          .card(v-for="(v,i) in scenarioData.scenes")
+          .card(v-for="(v,i) in scenario.scenes")
             .card-header {{v.url}}
             .card-body
               div {{v.dir}}
@@ -17,12 +17,12 @@
       .col-12.col-md-4
         label Scenario Title:
         input.border-primary.form-control(
-          type="text" v-model="scenarioData.title"
+          type="text" v-model="scenario.title"
         )
       .col-12.col-md-2
         label Scheduled Date:
         input.border-primary.form-control(
-          type="date" v-model="scenarioData.date"
+          type="date" v-model="scenario.date"
         )
       .col-12.col-md-3
         label Interval:
@@ -30,13 +30,13 @@
           label.btn.border.border-primary.mt-0(
             v-for="(v,i) in intervalList"
             :class="{'btn-primary':isActiveInterval(v.value)}"
-            @click="scenarioData.interval = v.value"
+            @click="scenario.interval = v.value"
           ) {{v.text}}
 
       .col-12.col-md-4
         label E-Mail:
         input.border-primary.form-control(
-          type="email" v-model="scenarioData.mail"
+          type="email" v-model="scenario.mail"
         )
     SceneModal(
       v-if="visibleSceneModal"
@@ -54,17 +54,9 @@ export default {
     SceneModal
   },
   props: {
-    scenarioData: {
+    scenario: {
       type: Object,
-      default: () => {
-        return {
-          title: null,
-          date: null,
-          mail: null,
-          interval: 1,
-          scenes: []
-        }
-      }
+      default: () => {}
     }
   },
   data () {
@@ -84,7 +76,7 @@ export default {
   },
   methods: {
     isActiveInterval (value) {
-      return (parseInt(this.scenarioData.interval) === parseInt(value))
+      return (parseInt(this.scenario.interval) === parseInt(value))
     },
     showSceneModal () {
       this.visibleSceneModal = true
@@ -102,7 +94,7 @@ export default {
       this.$emit('message', mode, text)
     },
     registerScene (sceneData) {
-      this.scenarioData.scenes.push(sceneData)
+      this.scenario.scenes.push(sceneData)
       this.hideSceneModal()
     }
   }
